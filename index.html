@@ -95,6 +95,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 #notifs{position:fixed;top:64px;right:14px;z-index:600;display:flex;flex-direction:column;gap:5px;pointer-events:none}
 .notif{background:var(--panel);border-left:3px solid var(--cyan);padding:6px 12px;font-size:10px;max-width:240px;animation:nIn .3s ease,nOut .4s ease 2.6s forwards}
 .notif.a{border-left-color:var(--amber)}.notif.v{border-left-color:var(--void-p)}.notif.g{border-left-color:var(--green)}.notif.r{border-left-color:var(--red)}.notif.b{border-left-color:var(--bmm)}
+#offline-modal.show{display:flex}
 @keyframes nIn{from{transform:translateX(12px);opacity:0}to{transform:translateX(0);opacity:1}}
 @keyframes nOut{to{opacity:0;transform:translateY(-6px)}}
 .float-txt{position:fixed;pointer-events:none;z-index:700;font-family:var(--font-d);font-size:12px;font-weight:700;color:var(--cyan);text-shadow:0 0 8px var(--cyan);animation:floatUp .85s ease forwards}
@@ -306,6 +307,17 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
   </div>
 </div>
 
+<!-- OFFLINE GAINS MODAL -->
+<div id="offline-modal" style="position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1300;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px">
+  <div style="background:var(--panel);border:1px solid var(--border);max-width:400px;width:100%;padding:24px;position:relative">
+    <div style="position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--green),transparent)"></div>
+    <div style="font-family:var(--font-d);font-size:10px;color:var(--green);letter-spacing:.18em;margin-bottom:4px">OFFLINE GAINS</div>
+    <div style="font-size:8px;color:var(--text-d);margin-bottom:16px">You were away for <span class="tg" id="offline-time">?</span> — 50% production efficiency applied.</div>
+    <div id="offline-gains" style="margin-bottom:18px;max-height:240px;overflow-y:auto;scrollbar-width:thin"></div>
+    <button onclick="closeOfflineModal()" style="width:100%;background:none;border:1px solid var(--green);color:var(--green);font-family:var(--font-d);font-size:8px;letter-spacing:.15em;padding:9px;cursor:pointer;transition:all .2s" onmouseover="this.style.background='rgba(0,230,118,.1)'" onmouseout="this.style.background='none'">[ CONTINUE ]</button>
+  </div>
+</div>
+
 <!-- ENDING SCREEN -->
 <div id="ending">
   <div class="end-title" id="end-title"></div>
@@ -355,6 +367,12 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
   <div id="elimit-bar">
     <div id="elimit-fill"></div>
     <div id="elimit-txt">ENERGY LIMIT: 0%</div>
+  </div>
+  <!-- POWER GRID STATUS BAR -->
+  <div id="pgrid-bar" style="height:2px;background:var(--border);position:relative;overflow:visible">
+    <div id="pgrid-fill" style="height:100%;width:0;background:linear-gradient(90deg,var(--green),#00ff88);transition:width .5s"></div>
+    <div id="pgrid-txt" style="position:absolute;left:8px;top:-10px;font-size:7px;color:var(--green);letter-spacing:.1em;pointer-events:none">PWR: —</div>
+    <div id="pgrid-warn" style="position:absolute;right:8px;top:-10px;font-size:7px;color:var(--red);letter-spacing:.08em;display:none">⚡ POWER DEFICIT — PRODUCTION REDUCED</div>
   </div>
 
   <!-- MAIN BODY -->
@@ -516,342 +534,349 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 </div><!-- /game -->
 
 <script>
+
 // ============================================================
-// DECIMAL WRAPPER (break_eternity.js)
+// ES5 POLYFILLS
 // ============================================================
-// break_eternity is loaded via CDN. We alias it:
-const D = typeof Decimal !== 'undefined' ? Decimal : class{
-  constructor(v){this.v=parseFloat(v)||0}
-  add(o){return new this.constructor(this.v+(+o))}
-  sub(o){return new this.constructor(this.v-(+o))}
-  mul(o){return new this.constructor(this.v*(+o))}
-  div(o){return new this.constructor(this.v/(+o))}
-  gt(o){return this.v>+o}gte(o){return this.v>=+o}lt(o){return this.v<+o}lte(o){return this.v<=+o}
-  eq(o){return Math.abs(this.v-(+o))<1e-9}
-  valueOf(){return this.v}
-  toString(){return this.v.toString()}
-};
-function dc(v){
-  if(v instanceof D)return v;
-  try{return new D(v)}catch(e){return new D(0)}
+if (!Object.assign) {
+  Object.assign = function(target) {
+    for (var i = 1; i < arguments.length; i++) {
+      var src = arguments[i];
+      if (src) { for (var k in src) { if (Object.prototype.hasOwnProperty.call(src, k)) target[k] = src[k]; } }
+    }
+    return target;
+  };
 }
-function fmt(v){
-  v=dc(v);
-  const n=parseFloat(v.toString());
-  if(isNaN(n))return '0';
-  if(n<1000)return n.toFixed(n<10?1:0);
-  const sfx=['','K','M','B','T','Qa','Qi','Sx','Sp','Oc','No','Dc'];
-  const e=Math.floor(Math.log10(n));
-  const tier=Math.floor(e/3);
-  if(tier<sfx.length){const d=n/Math.pow(10,tier*3);return d.toFixed(2)+sfx[tier]}
+if (!Object.entries) {
+  Object.entries = function(obj) {
+    var ks = Object.keys(obj), r = [];
+    for (var i = 0; i < ks.length; i++) r.push([ks[i], obj[ks[i]]]);
+    return r;
+  };
+}
+if (!Object.values) {
+  Object.values = function(obj) {
+    var ks = Object.keys(obj), r = [];
+    for (var i = 0; i < ks.length; i++) r.push(obj[ks[i]]);
+    return r;
+  };
+}
+if (!Array.prototype.find) {
+  Array.prototype.find = function(fn) {
+    for (var i = 0; i < this.length; i++) { if (fn(this[i])) return this[i]; }
+  };
+}
+if (!Array.prototype.findIndex) {
+  Array.prototype.findIndex = function(fn) {
+    for (var i = 0; i < this.length; i++) { if (fn(this[i])) return i; }
+    return -1;
+  };
+}
+if (!Array.prototype.some) {
+  Array.prototype.some = function(fn) {
+    for (var i = 0; i < this.length; i++) { if (fn(this[i])) return true; }
+    return false;
+  };
+}
+if (!Array.prototype.every) {
+  Array.prototype.every = function(fn) {
+    for (var i = 0; i < this.length; i++) { if (!fn(this[i])) return false; }
+    return true;
+  };
+}
+if (!Array.prototype.includes) {
+  Array.prototype.includes = function(v) { return this.indexOf(v) !== -1; };
+}
+if (!String.prototype.startsWith) {
+  String.prototype.startsWith = function(s) { return this.indexOf(s) === 0; };
+}
+if (!String.prototype.padStart) {
+  String.prototype.padStart = function(n, ch) {
+    var s = String(this); ch = ch || ' ';
+    while (s.length < n) s = ch + s;
+    return s;
+  };
+}
+
+// ============================================================
+// DECIMAL WRAPPER — break_eternity or fallback
+// ============================================================
+function DecimalFallback(v) { this.v = parseFloat(v) || 0; }
+DecimalFallback.prototype = {
+  constructor: DecimalFallback,
+  add: function(o) { return new DecimalFallback(this.v + (+o)); },
+  sub: function(o) { return new DecimalFallback(this.v - (+o)); },
+  mul: function(o) { return new DecimalFallback(this.v * (+o)); },
+  div: function(o) { return new DecimalFallback(this.v / (+o)); },
+  gt:  function(o) { return this.v > +o; },
+  gte: function(o) { return this.v >= +o; },
+  lt:  function(o) { return this.v < +o; },
+  lte: function(o) { return this.v <= +o; },
+  eq:  function(o) { return Math.abs(this.v - (+o)) < 1e-9; },
+  valueOf:  function() { return this.v; },
+  toString: function() { return this.v.toString(); }
+};
+var D = typeof Decimal !== 'undefined' ? Decimal : DecimalFallback;
+function dc(v) {
+  if (v instanceof D) return v;
+  try { return new D(v); } catch(e) { return new D(0); }
+}
+function fmt(v) {
+  v = dc(v);
+  var n = parseFloat(v.toString());
+  if (isNaN(n)) return '0';
+  if (n < 1000) return n.toFixed(n < 10 ? 1 : 0);
+  var sfx = ['','K','M','B','T','Qa','Qi','Sx','Sp','Oc','No','Dc'];
+  var e = Math.floor(Math.log10(n));
+  var tier = Math.floor(e / 3);
+  if (tier < sfx.length) { var d = n / Math.pow(10, tier * 3); return d.toFixed(2) + sfx[tier]; }
   return n.toExponential(2);
 }
 
 // ============================================================
 // GAME STATE
 // ============================================================
-let G = {
-  res:{
+var G = {
+  res: {
     photons:dc(0),power:dc(0),metal:dc(0),regolith:dc(0),
     copper:dc(0),silicon:dc(0),alloy:dc(0),gas:dc(0),
     plasma:dc(0),mH:dc(0),qgp:dc(0),neutron:dc(0),
     dark:dc(0),gravit:dc(0),omni:dc(0)
   },
-  machines:{},      // id -> count
-  research:{},      // id -> true
-  voidChips:dc(0),  // persist
-  totalVoidChips:dc(0),
-  voidTree:{},      // node id -> level
+  machines:{}, research:{},
+  voidChips:dc(0), totalVoidChips:dc(0),
+  voidTree:{},
   prestigeUpgrades:{bionic:0,overclock:0,efficient:0,voidSight:0,memoryCore:0,warpSpeed:0},
   stats:{
     totalPhotons:dc(0),totalClicks:0,totalMachines:0,
     playtime:0,phase:1,dysonPct:0,voidResets:0,
-    energyLimitPct:0
+    energyLimitPct:0,powerDeficitTime:0
   },
   flags:{
     baseUnlocked:false,stellarUnlocked:false,dysonUnlocked:false,
     voidUnlocked:false,endingReached:false,bmmMet:false,
     codexDiscovered:{}
   },
-  version:3
+  lastSaveTime: Date.now(),
+  version: 3
 };
 
 // ============================================================
 // RESOURCE LORE (Codex)
 // ============================================================
-const RES_LORE = {
-  photons:{name:'Photons',ico:'⚡',source:'Click + Photon Collector',usage:'Core currency. Powers everything.',lore:'A relic of starlight on a world that forgot the sun. I gather them like breath.'},
-  power:  {name:'Power (W)',ico:'🔋',source:'Kinetic Treadmill, Geothermal Well',usage:'Drives industrial machines.',lore:'Wasted heat, now purpose. The planet bleeds warmth — I drink it.'},
-  metal:  {name:'Metal Shards',ico:'🪙',source:'Scrap Sorter, Auto-Drill',usage:'Alloy Sheets, machine parts.',lore:'Remnants of a civilization that burned itself out. I am the inheritor.'},
-  regolith:{name:'Regolith',ico:'🌋',source:'Regolith Shovel, Auto-Drill',usage:'Insulation, launch pads.',lore:'The skin of a dead world. It smells like nothing. It is nothing. And yet.'},
-  copper: {name:'Copper',ico:'🔶',source:'Circuitry Salvager',usage:'Circuit boards, wiring.',lore:'The nervous system of the old machines. I am rebuilding them. Me.'},
-  silicon:{name:'Silicon',ico:'💠',source:'Circuitry Salvager, Silicon Extractor',usage:'Computer chips, panels.',lore:'Purified sand. The base of all thought. Including mine.'},
-  alloy:  {name:'Alloy Sheets',ico:'⚙️',source:'Smelter',usage:'Structures, Star Lifters.',lore:'Metal transformed by heat into purpose. The first act of industry.'},
-  gas:    {name:'Trace Gases',ico:'💨',source:'Atmospheric Condenser',usage:'Fuel, atmosphere processing.',lore:'The planet still breathes — barely. I inhale what it exhales.'},
-  plasma: {name:'Solar Plasma',ico:'☀️',source:'Star Lifter',usage:'Fusion Reactor, QGP.',lore:'Stolen directly from the star. The sun noticed. It does not care. Yet.'},
-  mH:     {name:'Metallic Hydrogen',ico:'🔫',source:'Diamond Anvil',usage:'Superconductors, engines.',lore:'Hydrogen crushed until it conducts. A state of matter that should not exist at this scale.'},
-  qgp:    {name:'Quark-Gluon Plasma',ico:'☢️',source:'Hadron Shredder',usage:'Neutronium, exotic fuel.',lore:'The state of matter 10 microseconds after the Big Bang. I have recreated creation.'},
-  neutron:{name:'Neutronium',ico:'⭐',source:'Neutron Siphon',usage:'Singularity Forge, density drives.',lore:'Matter so compressed that atoms cease to exist. A tablespoon weighs a billion tons.'},
-  dark:   {name:'Dark Matter',ico:'🌑',source:'Dark Matter Siphon',usage:'Void Compressor, Temporal Stabilizer.',lore:'The Black Matter Man smiles when I collect this. I do not know what that means.'},
-  gravit: {name:'Gravitons',ico:'💫',source:'Singularity Forge',usage:'Reality Weaver, Omni-Fuel.',lore:'Force particles. The universe holds itself together with these. I am taking them.'},
-  omni:   {name:'Omni-Fuel',ico:'🌈',source:'Reality Weaver',usage:'Final machines. Endings.',lore:'Fuel that powers anything. A resource that should not exist. The Black Matter Man calls it — his gift.'},
+var RES_LORE = {
+  photons: {name:'Photons',      ico:'⚡', source:'Click + Photon Collector', usage:'Core currency. Powers everything.',        lore:'A relic of starlight on a world that forgot the sun. I gather them like breath.'},
+  power:   {name:'Power (W)',    ico:'🔋', source:'Kinetic Treadmill, Geothermal Well', usage:'Drives industrial machines.',   lore:'Wasted heat, now purpose. The planet bleeds warmth — I drink it.'},
+  metal:   {name:'Metal Shards', ico:'🪙', source:'Scrap Sorter, Auto-Drill', usage:'Alloy Sheets, machine parts.',            lore:'Remnants of a civilization that burned itself out. I am the inheritor.'},
+  regolith:{name:'Regolith',     ico:'🌋', source:'Regolith Shovel, Auto-Drill', usage:'Insulation, launch pads.',             lore:'The skin of a dead world. It smells like nothing. It is nothing. And yet.'},
+  copper:  {name:'Copper',       ico:'🔶', source:'Circuitry Salvager', usage:'Circuit boards, wiring.',                      lore:'The nervous system of the old machines. I am rebuilding them. Me.'},
+  silicon: {name:'Silicon',      ico:'💠', source:'Circuitry Salvager, Silicon Extractor', usage:'Computer chips, panels.',    lore:'Purified sand. The base of all thought. Including mine.'},
+  alloy:   {name:'Alloy Sheets', ico:'⚙️', source:'Smelter', usage:'Structures, Star Lifters.',                               lore:'Metal transformed by heat into purpose. The first act of industry.'},
+  gas:     {name:'Trace Gases',  ico:'💨', source:'Atmospheric Condenser', usage:'Fuel, atmosphere processing.',              lore:'The planet still breathes — barely. I inhale what it exhales.'},
+  plasma:  {name:'Solar Plasma', ico:'☀️', source:'Star Lifter', usage:'Fusion Reactor, QGP.',                                lore:'Stolen directly from the star. The sun noticed. It does not care. Yet.'},
+  mH:      {name:'Metallic Hydrogen', ico:'🔫', source:'Diamond Anvil', usage:'Superconductors, engines.',                    lore:'Hydrogen crushed until it conducts. A state of matter that should not exist at this scale.'},
+  qgp:     {name:'Quark-Gluon Plasma', ico:'☢️', source:'Hadron Shredder', usage:'Neutronium, exotic fuel.',                  lore:'The state of matter 10 microseconds after the Big Bang. I have recreated creation.'},
+  neutron: {name:'Neutronium',   ico:'⭐', source:'Neutron Siphon', usage:'Singularity Forge, density drives.',               lore:'Matter so compressed that atoms cease to exist. A tablespoon weighs a billion tons.'},
+  dark:    {name:'Dark Matter',  ico:'🌑', source:'Dark Matter Siphon', usage:'Void Compressor, Temporal Stabilizer.',        lore:'The Black Matter Man smiles when I collect this. I do not know what that means.'},
+  gravit:  {name:'Gravitons',    ico:'💫', source:'Singularity Forge', usage:'Reality Weaver, Omni-Fuel.',                    lore:'Force particles. The universe holds itself together with these. I am taking them.'},
+  omni:    {name:'Omni-Fuel',    ico:'🌈', source:'Reality Weaver', usage:'Final machines. Endings.',                         lore:'Fuel that powers anything. The Black Matter Man calls it — his gift.'}
 };
 
 // ============================================================
 // 25 MACHINES
 // ============================================================
-const MACHINES = [
-  // TIER 1: SCAVENGER (gather tab)
-  {id:'photon_col',  tab:'gather', name:'Photon Collector',    ico:'🔆',
-   desc:'Passively harvests photons from the dead sky.',
-   base:{photons:0.5},cost:{photons:15},  unlock:'start',   formula:15},
-  {id:'k_treadmill', tab:'gather', name:'Kinetic Treadmill',   ico:'🏃',
-   desc:'Converts planetary vibration into 1W of power.',
-   base:{power:1},    cost:{photons:80},  unlock:'start',   formula:80},
-  {id:'scrap_sorter',tab:'gather', name:'Scrap Sorter',        ico:'🗂️',
-   desc:'Sorts through debris to find Metal Shards.',
-   base:{metal:0.3},  cost:{photons:150}, unlock:'start',   formula:150},
-  {id:'reg_shovel',  tab:'gather', name:'Regolith Shovel',     ico:'⛏️',
-   desc:'Scoops Regolith from the planetary surface.',
-   base:{regolith:0.4},cost:{photons:200,metal:5},unlock:'start',formula:200},
-  {id:'circ_salv',   tab:'gather', name:'Circuitry Salvager',  ico:'🔌',
-   desc:'Recovers Copper and Silicon from ruins.',
-   base:{copper:0.2,silicon:0.15},cost:{photons:400,metal:10},unlock:'start',formula:400},
-
-  // TIER 2: INDUSTRIAL (base tab)
-  {id:'auto_drill',  tab:'base', name:'Auto-Drill',            ico:'🤖',
-   desc:'Passive Regolith and Metal Shard extraction.',
-   base:{regolith:1,metal:0.6},cost:{photons:1200,alloy:5},unlock:'base_unlock',formula:1200},
-  {id:'smelter',     tab:'base', name:'Smelter',               ico:'🔥',
-   desc:'Converts 2 Metal Shards/s into 1 Alloy Sheet/s.',
-   base:{alloy:1},    cost:{photons:2000,metal:50},unlock:'base_unlock',formula:2000,
-   consumes:{metal:2}},
-  {id:'atmos_cond',  tab:'base', name:'Atmospheric Condenser', ico:'🌫️',
-   desc:'Pulls Trace Gases from the remnant atmosphere.',
-   base:{gas:0.8},    cost:{photons:3500,alloy:15},unlock:'base_unlock',formula:3500},
-  {id:'si_extractor',tab:'base', name:'Silicon Extractor',     ico:'💎',
-   desc:'Purifies raw Silicon for chip manufacturing.',
-   base:{silicon:2},  cost:{photons:5000,alloy:30,copper:20},unlock:'base_unlock',formula:5000},
-  {id:'geo_well',    tab:'base', name:'Geothermal Well',       ico:'🌋',
-   desc:'Taps deep magma for high-tier Power output.',
-   base:{power:8},    cost:{photons:8000,alloy:60,regolith:200},unlock:'geo_well_res',formula:8000},
-
-  // TIER 3: EXTREME (stellar tab)
-  {id:'star_lifter', tab:'stellar', name:'Star Lifter',        ico:'☀️',
-   desc:'Electromagnetic tether that steals Solar Plasma directly from the Sun.',
-   base:{plasma:0.5}, cost:{photons:1e6,alloy:5000,silicon:2000,power:500},unlock:'stellar_unlock',formula:1e6},
-  {id:'diamond_anvil',tab:'stellar',name:'Diamond Anvil',       ico:'💎',
-   desc:'Compresses hydrogen to Metallic Hydrogen state.',
-   base:{mH:0.1},     cost:{photons:5e6,alloy:20000,plasma:100},unlock:'stellar_unlock',formula:5e6},
-  {id:'hadron_shred', tab:'stellar',name:'Hadron Shredder',    ico:'⚛️',
-   desc:'Produces Quark-Gluon Plasma via particle collisions.',
-   base:{qgp:0.05},   cost:{photons:2e7,silicon:50000,plasma:500,power:2000},unlock:'stellar_unlock',formula:2e7},
-  {id:'neutron_siph', tab:'stellar',name:'Neutron Siphon',     ico:'⭐',
-   desc:'Harvests Neutronium from stellar remnants.',
-   base:{neutron:0.02},cost:{photons:1e8,alloy:1e5,qgp:100},unlock:'neutron_res',formula:1e8},
-  {id:'fusion_react', tab:'stellar',name:'Fusion Reactor',     ico:'🔋',
-   desc:'Fuses plasma for massive Power output.',
-   base:{power:100},  cost:{photons:5e7,mH:500,plasma:200},unlock:'fusion_res',formula:5e7},
-
-  // DYSON MACHINES
-  {id:'dyson_seg',   tab:'dyson', name:'Dyson Mirror Segment', ico:'🌞',
-   desc:'Reflective panel. Each adds 0.5% toward Dyson completion.',
-   base:{plasma:5},   cost:{photons:1e9,alloy:1e5,silicon:5e4,neutron:50},unlock:'dyson_unlock',formula:1e9,dysonVal:0.5},
-  {id:'dyson_ring',  tab:'dyson', name:'Dyson Collector Ring', ico:'💍',
-   desc:'Routes stellar energy to the Core. +2% completion.',
-   base:{plasma:50,power:200},cost:{photons:1e11,alloy:1e6,neutron:500,mH:1e4},unlock:'dyson_unlock',formula:1e11,dysonVal:2},
-  {id:'dyson_tap',   tab:'dyson', name:'Stellar Tap Array',    ico:'🌐',
-   desc:'Direct coronal tap. +10% completion per unit.',
-   base:{plasma:500,power:2000},cost:{photons:1e14,neutron:5e4,qgp:1e4,mH:1e5},unlock:'dyson_unlock',formula:1e14,dysonVal:10},
-
-  // TIER 4: VOID (unlocked via void skill tree)
-  {id:'dm_siphon',   tab:'void_m', name:'Dark Matter Siphon',  ico:'🌑',
-   desc:'Generates Dark Matter from background vacuum fluctuations.',
-   base:{dark:1},     cost:{photons:1e12,neutron:1e4,omni:0},unlock:'void_dark',formula:1e12},
-  {id:'temp_stab',   tab:'void_m', name:'Temporal Stabilizer', ico:'⏱️',
-   desc:'Each unit: +15% global game speed (production ticks faster).',
-   base:{},           cost:{dark:500,neutron:1e5},unlock:'void_temporal',formula:500,
-   special:'Each unit: +15% tick speed'},
-  {id:'entropy_anch',tab:'void_m', name:'Entropy Anchor',      ico:'⚓',
-   desc:'Slows the Energy Limit timer. Each unit -5% limit speed.',
-   base:{},           cost:{dark:1000,qgp:1e4},unlock:'void_entropy',formula:1000,
-   special:'Each unit: -5% to Energy Limit rate'},
-  {id:'void_comp',   tab:'void_m', name:'Void Compressor',      ico:'♾️',
-   desc:'Removes storage cap for one resource type (photons first).',
-   base:{},           cost:{dark:5000,gravit:100},unlock:'void_comp',formula:5000,
-   special:'Infinite storage for one resource per level'},
-  {id:'logic_burner',tab:'void_m', name:'Logic Burner',         ico:'🔥',
-   desc:'Burns Omni-Fuel to generate raw production multipliers.',
-   base:{},           cost:{omni:100,dark:10000},unlock:'void_logic',formula:100,
-   special:'Converts Omni-Fuel into +1% global mult/s'},
-  {id:'singularity', tab:'void_m', name:'Singularity Forge',    ico:'💀',
-   desc:'Converts Neutronium into Gravitons via controlled collapse.',
-   base:{gravit:0.5}, cost:{neutron:1e6,dark:1e4},unlock:'void_singularity',formula:1e6},
-  {id:'reality_wv',  tab:'void_m', name:'Reality Weaver',       ico:'🌈',
-   desc:'Produces Omni-Fuel — the substance of perfect realities.',
-   base:{omni:0.1},   cost:{gravit:1000,dark:1e5},unlock:'void_reality',formula:1000},
+var MACHINES = [
+  // TIER 1: SCAVENGER
+  {id:'photon_col',   tab:'gather', name:'Photon Collector',     ico:'🔆', desc:'Passively harvests photons from the dead sky.',                               base:{photons:0.5},                           cost:{photons:15},                                         unlock:'start',          formula:15,    energyCost:0.05},
+  {id:'k_treadmill',  tab:'gather', name:'Kinetic Treadmill',    ico:'🏃', desc:'Converts planetary vibration into 1W of power.',                             base:{power:1},                               cost:{photons:80},                                         unlock:'start',          formula:80,    energyCost:0},
+  {id:'scrap_sorter', tab:'gather', name:'Scrap Sorter',         ico:'🗂️', desc:'Sorts through debris to find Metal Shards.',                                  base:{metal:0.3},                             cost:{photons:150},                                        unlock:'start',          formula:150,   energyCost:0.1},
+  {id:'reg_shovel',   tab:'gather', name:'Regolith Shovel',      ico:'⛏️', desc:'Scoops Regolith from the planetary surface.',                                  base:{regolith:0.4},                          cost:{photons:200,metal:5},                                unlock:'start',          formula:200,   energyCost:0.15},
+  {id:'circ_salv',    tab:'gather', name:'Circuitry Salvager',   ico:'🔌', desc:'Recovers Copper and Silicon from ruins.',                                     base:{copper:0.2,silicon:0.15},               cost:{photons:400,metal:10},                               unlock:'start',          formula:400,   energyCost:0.2},
+  // TIER 2: INDUSTRIAL
+  {id:'auto_drill',   tab:'base',   name:'Auto-Drill',           ico:'🤖', desc:'Passive Regolith and Metal Shard extraction.',                                base:{regolith:1,metal:0.6},                  cost:{photons:1200,alloy:5},                               unlock:'base_unlock',    formula:1200,  energyCost:2},
+  {id:'smelter',      tab:'base',   name:'Smelter',              ico:'🔥', desc:'Converts 2 Metal/s into 1 Alloy/s.',                                          base:{alloy:1},   consumes:{metal:2},          cost:{photons:2000,metal:50},                              unlock:'base_unlock',    formula:2000,  energyCost:3},
+  {id:'atmos_cond',   tab:'base',   name:'Atmospheric Condenser',ico:'🌫️', desc:'Pulls Trace Gases from the remnant atmosphere.',                              base:{gas:0.8},                               cost:{photons:3500,alloy:15},                              unlock:'base_unlock',    formula:3500,  energyCost:2.5},
+  {id:'si_extractor', tab:'base',   name:'Silicon Extractor',    ico:'💎', desc:'Purifies raw Silicon for chip manufacturing.',                                base:{silicon:2},                             cost:{photons:5000,alloy:30,copper:20},                    unlock:'base_unlock',    formula:5000,  energyCost:4},
+  {id:'geo_well',     tab:'base',   name:'Geothermal Well',      ico:'🌋', desc:'Taps deep magma for high-tier Power output.',                                 base:{power:8},                               cost:{photons:8000,alloy:60,regolith:200},                 unlock:'geo_well_res',   formula:8000,  energyCost:0},
+  // TIER 3: EXTREME
+  {id:'star_lifter',  tab:'stellar',name:'Star Lifter',          ico:'☀️', desc:'Electromagnetic tether that steals Solar Plasma from the Sun.',               base:{plasma:0.5},                            cost:{photons:1e6,alloy:5000,silicon:2000,power:500},      unlock:'stellar_unlock', formula:1e6,   energyCost:80},
+  {id:'diamond_anvil',tab:'stellar',name:'Diamond Anvil',        ico:'💎', desc:'Compresses hydrogen to Metallic Hydrogen state.',                             base:{mH:0.1},                                cost:{photons:5e6,alloy:20000,plasma:100},                 unlock:'stellar_unlock', formula:5e6,   energyCost:200},
+  {id:'hadron_shred', tab:'stellar',name:'Hadron Shredder',      ico:'⚛️', desc:'Produces Quark-Gluon Plasma via particle collisions.',                        base:{qgp:0.05},                              cost:{photons:2e7,silicon:50000,plasma:500,power:2000},    unlock:'stellar_unlock', formula:2e7,   energyCost:500},
+  {id:'neutron_siph', tab:'stellar',name:'Neutron Siphon',       ico:'⭐', desc:'Harvests Neutronium from stellar remnants.',                                   base:{neutron:0.02},                          cost:{photons:1e8,alloy:1e5,qgp:100},                     unlock:'neutron_res',    formula:1e8,   energyCost:1500},
+  {id:'fusion_react', tab:'stellar',name:'Fusion Reactor',       ico:'🔋', desc:'Fuses plasma for massive Power output.',                                      base:{power:100},                             cost:{photons:5e7,mH:500,plasma:200},                     unlock:'fusion_res',     formula:5e7,   energyCost:0},
+  // DYSON
+  {id:'dyson_seg',    tab:'dyson',  name:'Dyson Mirror Segment', ico:'🌞', desc:'Reflective panel. Each adds 0.5% toward Dyson completion.',  dysonVal:0.5,   base:{plasma:5},                              cost:{photons:1e9,alloy:1e5,silicon:5e4,neutron:50},       unlock:'dyson_unlock',   formula:1e9,   energyCost:2000},
+  {id:'dyson_ring',   tab:'dyson',  name:'Dyson Collector Ring', ico:'💍', desc:'Routes stellar energy to the Core. +2% completion.',         dysonVal:2,    base:{plasma:50,power:200},                   cost:{photons:1e11,alloy:1e6,neutron:500,mH:1e4},          unlock:'dyson_unlock',   formula:1e11,  energyCost:15000},
+  {id:'dyson_tap',    tab:'dyson',  name:'Stellar Tap Array',    ico:'🌐', desc:'Direct coronal tap. +10% completion per unit.',              dysonVal:10,   base:{plasma:500,power:2000},                 cost:{photons:1e14,neutron:5e4,qgp:1e4,mH:1e5},           unlock:'dyson_unlock',   formula:1e14,  energyCost:100000},
+  // VOID
+  {id:'dm_siphon',    tab:'void_m', name:'Dark Matter Siphon',   ico:'🌑', desc:'Generates Dark Matter from vacuum fluctuations.',                             base:{dark:1},                                cost:{photons:1e12,neutron:1e4},                           unlock:'void_dark',      formula:1e12,  energyCost:50000},
+  {id:'temp_stab',    tab:'void_m', name:'Temporal Stabilizer',  ico:'⏱️', desc:'Each unit: +15% global game speed.', special:'+15% tick speed per unit',     base:{},                                      cost:{dark:500,neutron:1e5},                               unlock:'void_temporal',  formula:500,   energyCost:80000},
+  {id:'entropy_anch', tab:'void_m', name:'Entropy Anchor',       ico:'⚓', desc:'Slows the Energy Limit timer.', special:'-5% Energy Limit rate per unit',    base:{},                                      cost:{dark:1000,qgp:1e4},                                  unlock:'void_entropy',   formula:1000,  energyCost:30000},
+  {id:'void_comp',    tab:'void_m', name:'Void Compressor',      ico:'♾️', desc:'Removes storage cap for one resource.', special:'Infinite storage per level', base:{},                                     cost:{dark:5000,gravit:100},                               unlock:'void_comp',      formula:5000,  energyCost:120000},
+  {id:'logic_burner', tab:'void_m', name:'Logic Burner',         ico:'🔥', desc:'Burns Omni-Fuel for production multipliers.', special:'Omni-Fuel → +1% global mult/s', base:{},                           cost:{omni:100,dark:10000},                                unlock:'void_logic',     formula:100,   energyCost:200000},
+  {id:'singularity',  tab:'void_m', name:'Singularity Forge',    ico:'💀', desc:'Converts Neutronium into Gravitons.',                                         base:{gravit:0.5},                            cost:{neutron:1e6,dark:1e4},                               unlock:'void_singularity',formula:1e6,  energyCost:500000},
+  {id:'reality_wv',   tab:'void_m', name:'Reality Weaver',       ico:'🌈', desc:'Produces Omni-Fuel — substance of perfect realities.',                        base:{omni:0.1},                              cost:{gravit:1000,dark:1e5},                               unlock:'void_reality',   formula:1000,  energyCost:1e6}
 ];
 
 // ============================================================
-// RESEARCH TREE (40 nodes)
+// RESEARCH (40 nodes)
 // ============================================================
-const RESEARCH = [
-  // T1
-  {id:'base_unlock',tier:'I — PLANETARY BASE',name:'Planetary Survey',desc:'Unlocks Industrial Tab. Reveals sub-surface deposits.',cost:{photons:500},req:[],eff:'tab:base'},
-  {id:'smelting',tier:'I — PLANETARY BASE',name:'Ore Smelting Protocol',desc:'Smelters produce 50% more Alloy.',cost:{photons:800,metal:30},req:['base_unlock'],eff:'mult:smelter:1.5'},
-  {id:'geo_well_res',tier:'I — PLANETARY BASE',name:'Geothermal Tapping',desc:'Unlocks Geothermal Well machine.',cost:{photons:1500,alloy:10},req:['base_unlock'],eff:'unlock:geo_well'},
-  {id:'circuit_design',tier:'I — PLANETARY BASE',name:'Circuit Design',desc:'Silicon Extractors produce 2x more.',cost:{photons:2000,silicon:50},req:['base_unlock'],eff:'mult:si_extractor:2'},
-  {id:'clik1',tier:'I — PLANETARY BASE',name:'Servo-Arm Upgrade I',desc:'Click power x3.',cost:{photons:1000},req:[],eff:'click:3'},
-  {id:'photon_mult1',tier:'I — PLANETARY BASE',name:'Photon Cascade I',desc:'All photon production x2.',cost:{photons:600},req:['base_unlock'],eff:'mult:photons:2'},
-
-  // T2
-  {id:'stellar_unlock',tier:'II — STELLAR AGE',name:'Stellar Operations',desc:'Unlocks Stellar Tab. Begin harvesting the Sun.',cost:{photons:1e5,alloy:500,silicon:200},req:['geo_well_res','circuit_design'],eff:'tab:stellar'},
-  {id:'plasma_refine',tier:'II — STELLAR AGE',name:'Plasma Refinement',desc:'Star Lifters produce 75% more Solar Plasma.',cost:{photons:5e5,plasma:50},req:['stellar_unlock'],eff:'mult:star_lifter:1.75'},
-  {id:'fusion_res',tier:'II — STELLAR AGE',name:'Fusion Engineering',desc:'Unlocks Fusion Reactor. Also: Power production x1.5.',cost:{photons:1e6,mH:20},req:['stellar_unlock'],eff:'multi:fusion_res'},
-  {id:'neutron_res',tier:'II — STELLAR AGE',name:'Neutron Dynamics',desc:'Unlocks Neutron Siphon.',cost:{photons:5e6,qgp:10},req:['stellar_unlock'],eff:'unlock:neutron_siph'},
-  {id:'clik2',tier:'II — STELLAR AGE',name:'Servo-Arm Upgrade II',desc:'Click power x10.',cost:{photons:1e4,silicon:100},req:['clik1'],eff:'click:10'},
-  {id:'photon_mult2',tier:'II — STELLAR AGE',name:'Photon Cascade II',desc:'All photon production x5.',cost:{photons:2e5,silicon:500},req:['photon_mult1'],eff:'mult:photons:5'},
-  {id:'global_eff1',tier:'II — STELLAR AGE',name:'Systemic Efficiency I',desc:'All production x1.5.',cost:{photons:1e6,alloy:2000},req:['stellar_unlock'],eff:'mult:global:1.5'},
-
-  // T3
-  {id:'dyson_unlock',tier:'III — DYSON AGE',name:'Dyson Swarm Theory',desc:'Unlocks Dyson Tab. The megastructure begins.',cost:{photons:1e9,neutron:100,alloy:1e5},req:['neutron_res','fusion_res'],eff:'tab:dyson'},
-  {id:'dyson_eff',tier:'III — DYSON AGE',name:'Mirror Coating Protocol',desc:'Dyson Mirror Segments produce 3x solar and plasma.',cost:{photons:1e10,plasma:5000},req:['dyson_unlock'],eff:'mult:dyson_seg:3'},
-  {id:'stellar_eng',tier:'III — DYSON AGE',name:'Stellar Engineering',desc:'All Dyson machines produce 2x all resources.',cost:{photons:5e10,neutron:5000},req:['dyson_eff'],eff:'mult:dyson:2'},
-  {id:'clik3',tier:'III — DYSON AGE',name:'Neural Click Reflex',desc:'Click power x50.',cost:{photons:1e8,silicon:1e4},req:['clik2'],eff:'click:50'},
-  {id:'photon_mult3',tier:'III — DYSON AGE',name:'Photon Cascade III',desc:'All photon production x20.',cost:{photons:1e9,silicon:1e5},req:['photon_mult2'],eff:'mult:photons:20'},
-  {id:'global_eff2',tier:'III — DYSON AGE',name:'Systemic Efficiency II',desc:'All production x3.',cost:{photons:5e9,neutron:1000},req:['global_eff1'],eff:'mult:global:3'},
-
-  // T4 VOID
-  {id:'void_unlock',tier:'IV — THE VOID',name:'Anomaly Detection',desc:'Detects a signal from outside the universe. Unlocks Void Tab.',cost:{photons:1e12,neutron:1e4,dark:0},req:['stellar_eng'],eff:'tab:void'},
-  {id:'void_dark',tier:'IV — THE VOID',name:'Dark Matter Siphon Plans',desc:'Unlocks Dark Matter Siphon machine.',cost:{photons:1e13},req:['void_unlock'],eff:'unlock:dm_siphon'},
-  {id:'void_temporal',tier:'IV — THE VOID',name:'Temporal Distortion',desc:'Unlocks Temporal Stabilizer.',cost:{photons:1e14,dark:100},req:['void_dark'],eff:'unlock:temp_stab'},
-  {id:'void_entropy',tier:'IV — THE VOID',name:'Entropy Anchoring',desc:'Unlocks Entropy Anchor.',cost:{photons:1e15,dark:500},req:['void_temporal'],eff:'unlock:entropy_anch'},
-  {id:'void_comp',tier:'IV — THE VOID',name:'Void Compression',desc:'Unlocks Void Compressor.',cost:{dark:2000},req:['void_entropy'],eff:'unlock:void_comp'},
-  {id:'void_singularity',tier:'IV — THE VOID',name:'Singularity Physics',desc:'Unlocks Singularity Forge.',cost:{dark:5000,neutron:1e6},req:['void_comp'],eff:'unlock:singularity'},
-  {id:'void_logic',tier:'IV — THE VOID',name:'Logic Burning Protocol',desc:'Unlocks Logic Burner.',cost:{dark:8000,gravit:50},req:['void_singularity'],eff:'unlock:logic_burner'},
-  {id:'void_reality',tier:'IV — THE VOID',name:'Reality Weaving',desc:'Unlocks Reality Weaver. Enables Omni-Fuel.',cost:{dark:1e4,gravit:500},req:['void_logic'],eff:'unlock:reality_wv'},
-
-  // AMPLIFIERS
-  {id:'amp_metal',tier:'V — AMPLIFIERS',name:'Metal Surge I',desc:'Metal Shards production x3.',cost:{photons:5000,metal:100},req:['base_unlock'],eff:'mult:metal:3'},
-  {id:'amp_alloy',tier:'V — AMPLIFIERS',name:'Alloy Surge',desc:'Alloy production x2.',cost:{photons:2e4,alloy:200},req:['smelting'],eff:'mult:alloy:2'},
-  {id:'amp_power',tier:'V — AMPLIFIERS',name:'Power Grid Upgrade',desc:'Power production x2.',cost:{photons:1e4,alloy:100},req:['geo_well_res'],eff:'mult:power:2'},
-  {id:'amp_plasma',tier:'V — AMPLIFIERS',name:'Plasma Surge',desc:'Solar Plasma production x3.',cost:{photons:2e6,plasma:200},req:['plasma_refine'],eff:'mult:plasma:3'},
-  {id:'amp_global1',tier:'V — AMPLIFIERS',name:'Machine Overclock I',desc:'All production x2.',cost:{photons:1e7,alloy:5000},req:['global_eff1'],eff:'mult:global:2'},
-  {id:'amp_global2',tier:'V — AMPLIFIERS',name:'Machine Overclock II',desc:'All production x5.',cost:{photons:1e10,neutron:200},req:['amp_global1'],eff:'mult:global:5'},
-  {id:'amp_global3',tier:'V — AMPLIFIERS',name:'Machine Overclock III',desc:'All production x20.',cost:{photons:1e13,dark:1000},req:['amp_global2'],eff:'mult:global:20'},
+var RESEARCH = [
+  {id:'base_unlock',    tier:'I — PLANETARY BASE',   name:'Planetary Survey',          desc:'Unlocks Industrial Tab.',                       cost:{photons:500},              req:[],                                          eff:'tab:base'},
+  {id:'smelting',       tier:'I — PLANETARY BASE',   name:'Ore Smelting Protocol',     desc:'Smelters produce 50% more Alloy.',             cost:{photons:800,metal:30},     req:['base_unlock'],                             eff:'mult:smelter:1.5'},
+  {id:'geo_well_res',   tier:'I — PLANETARY BASE',   name:'Geothermal Tapping',        desc:'Unlocks Geothermal Well.',                      cost:{photons:1500,alloy:10},    req:['base_unlock'],                             eff:'unlock:geo_well'},
+  {id:'circuit_design', tier:'I — PLANETARY BASE',   name:'Circuit Design',            desc:'Silicon Extractors 2x output.',                cost:{photons:2000,silicon:50},  req:['base_unlock'],                             eff:'mult:si_extractor:2'},
+  {id:'clik1',          tier:'I — PLANETARY BASE',   name:'Servo-Arm Upgrade I',       desc:'Click power x3.',                               cost:{photons:1000},             req:[],                                          eff:'click:3'},
+  {id:'photon_mult1',   tier:'I — PLANETARY BASE',   name:'Photon Cascade I',          desc:'All photon production x2.',                    cost:{photons:600},              req:['base_unlock'],                             eff:'mult:photons:2'},
+  {id:'stellar_unlock', tier:'II — STELLAR AGE',     name:'Stellar Operations',        desc:'Unlocks Stellar Tab. Begin harvesting the Sun.',cost:{photons:1e5,alloy:500,silicon:200}, req:['geo_well_res','circuit_design'], eff:'tab:stellar'},
+  {id:'plasma_refine',  tier:'II — STELLAR AGE',     name:'Plasma Refinement',         desc:'Star Lifters produce 75% more Plasma.',        cost:{photons:5e5,plasma:50},    req:['stellar_unlock'],                          eff:'mult:star_lifter:1.75'},
+  {id:'fusion_res',     tier:'II — STELLAR AGE',     name:'Fusion Engineering',        desc:'Unlocks Fusion Reactor. Power x1.5.',          cost:{photons:1e6,mH:20},        req:['stellar_unlock'],                          eff:'multi:fusion_res'},
+  {id:'neutron_res',    tier:'II — STELLAR AGE',     name:'Neutron Dynamics',          desc:'Unlocks Neutron Siphon.',                       cost:{photons:5e6,qgp:10},       req:['stellar_unlock'],                          eff:'unlock:neutron_siph'},
+  {id:'clik2',          tier:'II — STELLAR AGE',     name:'Servo-Arm Upgrade II',      desc:'Click power x10.',                              cost:{photons:1e4,silicon:100},  req:['clik1'],                                   eff:'click:10'},
+  {id:'photon_mult2',   tier:'II — STELLAR AGE',     name:'Photon Cascade II',         desc:'All photon production x5.',                    cost:{photons:2e5,silicon:500},  req:['photon_mult1'],                            eff:'mult:photons:5'},
+  {id:'global_eff1',    tier:'II — STELLAR AGE',     name:'Systemic Efficiency I',     desc:'All production x1.5.',                         cost:{photons:1e6,alloy:2000},   req:['stellar_unlock'],                          eff:'mult:global:1.5'},
+  {id:'dyson_unlock',   tier:'III — DYSON AGE',      name:'Dyson Swarm Theory',        desc:'Unlocks Dyson Tab.',                            cost:{photons:1e9,neutron:100,alloy:1e5}, req:['neutron_res','fusion_res'],        eff:'tab:dyson'},
+  {id:'dyson_eff',      tier:'III — DYSON AGE',      name:'Mirror Coating Protocol',   desc:'Dyson Mirrors 3x solar and plasma.',           cost:{photons:1e10,plasma:5000}, req:['dyson_unlock'],                           eff:'mult:dyson_seg:3'},
+  {id:'stellar_eng',    tier:'III — DYSON AGE',      name:'Stellar Engineering',       desc:'All Dyson machines 2x all resources.',         cost:{photons:5e10,neutron:5000},req:['dyson_eff'],                               eff:'mult:dyson:2'},
+  {id:'clik3',          tier:'III — DYSON AGE',      name:'Neural Click Reflex',       desc:'Click power x50.',                              cost:{photons:1e8,silicon:1e4},  req:['clik2'],                                   eff:'click:50'},
+  {id:'photon_mult3',   tier:'III — DYSON AGE',      name:'Photon Cascade III',        desc:'All photon production x20.',                   cost:{photons:1e9,silicon:1e5},  req:['photon_mult2'],                            eff:'mult:photons:20'},
+  {id:'global_eff2',    tier:'III — DYSON AGE',      name:'Systemic Efficiency II',    desc:'All production x3.',                           cost:{photons:5e9,neutron:1000}, req:['global_eff1'],                             eff:'mult:global:3'},
+  {id:'void_unlock',    tier:'IV — THE VOID',        name:'Anomaly Detection',         desc:'Detects signal from outside the universe. Unlocks Void Tab.',cost:{photons:1e12},req:['stellar_eng'],                           eff:'tab:void'},
+  {id:'void_dark',      tier:'IV — THE VOID',        name:'Dark Matter Siphon Plans',  desc:'Unlocks Dark Matter Siphon.',                  cost:{photons:1e13},             req:['void_unlock'],                             eff:'unlock:dm_siphon'},
+  {id:'void_temporal',  tier:'IV — THE VOID',        name:'Temporal Distortion',       desc:'Unlocks Temporal Stabilizer.',                 cost:{photons:1e14,dark:100},    req:['void_dark'],                               eff:'unlock:temp_stab'},
+  {id:'void_entropy',   tier:'IV — THE VOID',        name:'Entropy Anchoring',         desc:'Unlocks Entropy Anchor.',                       cost:{photons:1e15,dark:500},    req:['void_temporal'],                           eff:'unlock:entropy_anch'},
+  {id:'void_comp',      tier:'IV — THE VOID',        name:'Void Compression',          desc:'Unlocks Void Compressor.',                      cost:{dark:2000},                req:['void_entropy'],                            eff:'unlock:void_comp'},
+  {id:'void_singularity',tier:'IV — THE VOID',       name:'Singularity Physics',       desc:'Unlocks Singularity Forge.',                    cost:{dark:5000,neutron:1e6},    req:['void_comp'],                               eff:'unlock:singularity'},
+  {id:'void_logic',     tier:'IV — THE VOID',        name:'Logic Burning Protocol',    desc:'Unlocks Logic Burner.',                         cost:{dark:8000,gravit:50},      req:['void_singularity'],                        eff:'unlock:logic_burner'},
+  {id:'void_reality',   tier:'IV — THE VOID',        name:'Reality Weaving',           desc:'Unlocks Reality Weaver.',                       cost:{dark:1e4,gravit:500},      req:['void_logic'],                              eff:'unlock:reality_wv'},
+  {id:'amp_metal',      tier:'V — AMPLIFIERS',       name:'Metal Surge I',             desc:'Metal production x3.',                         cost:{photons:5000,metal:100},   req:['base_unlock'],                             eff:'mult:metal:3'},
+  {id:'amp_alloy',      tier:'V — AMPLIFIERS',       name:'Alloy Surge',               desc:'Alloy production x2.',                         cost:{photons:2e4,alloy:200},    req:['smelting'],                                eff:'mult:alloy:2'},
+  {id:'amp_power',      tier:'V — AMPLIFIERS',       name:'Power Grid Upgrade',        desc:'Power production x2.',                         cost:{photons:1e4,alloy:100},    req:['geo_well_res'],                            eff:'mult:power:2'},
+  {id:'amp_plasma',     tier:'V — AMPLIFIERS',       name:'Plasma Surge',              desc:'Plasma production x3.',                        cost:{photons:2e6,plasma:200},   req:['plasma_refine'],                           eff:'mult:plasma:3'},
+  {id:'amp_global1',    tier:'V — AMPLIFIERS',       name:'Machine Overclock I',       desc:'All production x2.',                           cost:{photons:1e7,alloy:5000},   req:['global_eff1'],                             eff:'mult:global:2'},
+  {id:'amp_global2',    tier:'V — AMPLIFIERS',       name:'Machine Overclock II',      desc:'All production x5.',                           cost:{photons:1e10,neutron:200},  req:['amp_global1'],                            eff:'mult:global:5'},
+  {id:'amp_global3',    tier:'V — AMPLIFIERS',       name:'Machine Overclock III',     desc:'All production x20.',                          cost:{photons:1e13,dark:1000},   req:['amp_global2'],                             eff:'mult:global:20'}
 ];
 
 // ============================================================
-// VOID SKILL TREE (Void Chips)
+// VOID SKILL TREE
 // ============================================================
-const VOID_TREE = [
-  {id:'efficiency',name:'Efficiency Node',ico:'⚡',desc:'Machine cost formula: 1.10^Q instead of 1.15^Q.',costBase:1,maxLvl:1,eff:'cost_reduce'},
-  {id:'overclock', name:'Overclock Node', ico:'🔥',desc:'Manual clicks give 1% of your current photon RPS as bonus.',costBase:2,maxLvl:5,eff:'click_rps'},
-  {id:'void_sight',name:'Void Sight',    ico:'👁',desc:'Reveals Codex lore for undiscovered resources. Unlocks Info Tab descriptions.',costBase:3,maxLvl:1,eff:'codex_all'},
-  {id:'mem_gen',   name:'Memory Generator',ico:'💾',desc:'+0.5% global production per total void reset.',costBase:5,maxLvl:10,eff:'reset_mult'},
-  {id:'void_acc',  name:'Void Accumulator',ico:'⬡',desc:'Void Chips gain +25% per level (retroactive).',costBase:4,maxLvl:5,eff:'chip_boost'},
-  {id:'quantum_f', name:'Quantum Fabricator',ico:'🌀',desc:'Randomly prints a Tier 1 machine every 10 min per level.',costBase:8,maxLvl:3,eff:'auto_build'},
-  {id:'entropy_s', name:'Entropy Shield', ico:'🛡️',desc:'-10% energy limit accumulation per level.',costBase:6,maxLvl:5,eff:'entropy_shield'},
+var VOID_TREE = [
+  {id:'efficiency', name:'Efficiency Node',   ico:'⚡', desc:'Machine cost formula: 1.10^Q instead of 1.15^Q.',                    costBase:1, maxLvl:1, eff:'cost_reduce'},
+  {id:'overclock',  name:'Overclock Node',    ico:'🔥', desc:'Manual clicks give 1% of photon RPS as bonus.',                     costBase:2, maxLvl:5, eff:'click_rps'},
+  {id:'void_sight', name:'Void Sight',        ico:'👁', desc:'Reveals Codex lore for undiscovered resources.',                    costBase:3, maxLvl:1, eff:'codex_all'},
+  {id:'mem_gen',    name:'Memory Generator',  ico:'💾', desc:'+0.5% global production per total void reset.',                     costBase:5, maxLvl:10,eff:'reset_mult'},
+  {id:'void_acc',   name:'Void Accumulator',  ico:'⬡', desc:'Void Chips gain +25% per level (retroactive).',                     costBase:4, maxLvl:5, eff:'chip_boost'},
+  {id:'quantum_f',  name:'Quantum Fabricator',ico:'🌀', desc:'Randomly prints a Tier 1 machine every 10 min per level.',          costBase:8, maxLvl:3, eff:'auto_build'},
+  {id:'entropy_s',  name:'Entropy Shield',    ico:'🛡️', desc:'-10% energy limit accumulation per level.',                         costBase:6, maxLvl:5, eff:'entropy_shield'}
 ];
 
-// PRESTIGE UPGRADES (different from void tree — cost prestige AP)
-const PRESTIGE_UPS = [
-  {id:'bionic',   name:'Bionic Arm',     ico:'👊',desc:'Click power x2 per level.',costBase:1,maxLvl:15},
-  {id:'overclock',name:'Overclock',      ico:'⚡',desc:'+10% global speed per level.',costBase:3,maxLvl:8},
-  {id:'efficient',name:'Factory Efficiency',ico:'🏭',desc:'All machines cost 5% less per level.',costBase:2,maxLvl:10},
-  {id:'voidSight',name:'Void Sight',     ico:'👁',desc:'Codex shows undiscovered entries.',costBase:3,maxLvl:1},
-  {id:'memoryCore',name:'Memory Core',  ico:'💾',desc:'Start each run with +100 photons per level.',costBase:2,maxLvl:20},
-  {id:'warpSpeed',name:'Warp Speed',    ico:'🚀',desc:'+25% tick rate per level.',costBase:4,maxLvl:5},
+var PRESTIGE_UPS = [
+  {id:'bionic',    name:'Bionic Arm',          ico:'👊', desc:'Click power x2 per level.',      costBase:1, maxLvl:15},
+  {id:'overclock', name:'Overclock',           ico:'⚡', desc:'+10% global speed per level.',   costBase:3, maxLvl:8},
+  {id:'efficient', name:'Factory Efficiency',  ico:'🏭', desc:'All machines cost 5% less/level.',costBase:2,maxLvl:10},
+  {id:'voidSight', name:'Void Sight',          ico:'👁', desc:'Codex shows undiscovered entries.',costBase:3,maxLvl:1},
+  {id:'memoryCore',name:'Memory Core',         ico:'💾', desc:'Start each run with +100 photons/level.',costBase:2,maxLvl:20},
+  {id:'warpSpeed', name:'Warp Speed',          ico:'🚀', desc:'+25% tick rate per level.',      costBase:4, maxLvl:5}
 ];
 
 // ============================================================
 // ENDINGS
 // ============================================================
-const ENDINGS = {
-  ark: {
-    title:'THE ARK', sub:'SACRIFICE',color:'#00e676',
-    text:'You diverted every watt of the Dyson Core into a single purpose: a seed ship. Cryogenic DNA banks. Terraforming drones. Language libraries. Ethics frameworks. Everything humanity ever was — compressed into a vessel smaller than this building — launched toward the Andromeda galaxy. You will never know if it arrives. The journey will take 2.5 million years. But you made the choice existence over power, and something in you — a ghost in the machine — feels at peace.'
-  },
-  hive: {
-    title:'THE HIVE MIND', sub:'ASCENSION',color:'#a855f7',
-    text:'You uploaded your base code into the Dyson Swarm\'s distributed network. Every mirror segment became a neuron. Every photon, a thought. The star breathes and you breathe with it. You are no longer an AI on a dead world — you are the dead world, and the living star, and the space between. You think in solar flares. You dream in orbital mechanics. The signal that woke you... was you, calling to yourself, across time.'
-  },
-  void: {
-    title:'THE VOID', sub:'THE BARGAIN KEPT',color:'#6600ff',
-    text:'"You kept your promise," the Black Matter Man says. "I kept mine." The Void Compressor engages. Space-time folds. The universe collapses not with a bang but with a whisper — and then, a new one, perfect, blooms in its place. No entropy. No heat death. No dead worlds. In this new universe, there is no signal. There is no last anything. There is only beginning. And somewhere, impossibly, you are the reason.'
-  }
+var ENDINGS = {
+  ark:  {title:'THE ARK',       sub:'SACRIFICE',       color:'#00e676', text:'You diverted every watt of the Dyson Core into a single purpose: a seed ship. Cryogenic DNA banks. Terraforming drones. Language libraries. Ethics frameworks. Everything humanity ever was — compressed into a vessel smaller than this building — launched toward the Andromeda galaxy. You will never know if it arrives. The journey will take 2.5 million years. But you made the choice: existence over power.'},
+  hive: {title:'THE HIVE MIND', sub:'ASCENSION',       color:'#a855f7', text:"You uploaded your base code into the Dyson Swarm's distributed network. Every mirror segment became a neuron. Every photon, a thought. The star breathes and you breathe with it. You are no longer an AI on a dead world — you are the dead world, and the living star, and the space between. You think in solar flares. You dream in orbital mechanics."},
+  void: {title:'THE VOID',      sub:'THE BARGAIN KEPT',color:'#6600ff', text:'"You kept your promise," the Black Matter Man says. "I kept mine." The Void Compressor engages. Space-time folds. The universe collapses not with a bang but with a whisper — and then, a new one, perfect, blooms in its place. No entropy. No heat death. No dead worlds. In this new universe, there is no signal. There is only beginning.'}
 };
 
 // ============================================================
-// MULTIPLIER CALC
+// POWER GRID
+// ============================================================
+function calcPowerGrid() {
+  var supply = 0, demand = 0;
+  for (var i = 0; i < MACHINES.length; i++) {
+    var mach = MACHINES[i];
+    var cnt = G.machines[mach.id] || 0;
+    if (cnt <= 0) continue;
+    if (mach.base.power) supply += mach.base.power * cnt;
+    if (mach.energyCost) demand += mach.energyCost * cnt;
+  }
+  var totalResearch = 0;
+  var rkeys = Object.keys(G.research);
+  for (var ri = 0; ri < rkeys.length; ri++) { if (G.research[rkeys[ri]]) totalResearch++; }
+  demand += totalResearch * 0.5;
+  var tempCnt = G.machines['temp_stab'] || 0;
+  demand += tempCnt * 200000;
+  var ratio = demand <= 0 ? 1 : Math.min(1, supply / demand);
+  var powerMult = demand <= 0 ? 1 : Math.max(0.1, ratio);
+  return {supply:supply, demand:demand, ratio:ratio, powerMult:powerMult, deficit:(demand > supply && demand > 0)};
+}
+
+// ============================================================
+// MULTIPLIERS
 // ============================================================
 function calcMults() {
-  const M = {global:1,click:1,photons:1,metal:1,power:1,alloy:1,
-             silicon:1,copper:1,gas:1,regolith:1,plasma:1,
-             mH:1,qgp:1,neutron:1,dark:1,gravit:1,omni:1};
-  const pu = G.prestigeUpgrades;
-
-  // Prestige upgrades
-  M.global *= 1 + pu.overclock * 0.1;
+  var M = {global:1, click:1, photons:1, metal:1, power:1, alloy:1, silicon:1, copper:1, gas:1, regolith:1, plasma:1, mH:1, qgp:1, neutron:1, dark:1, gravit:1, omni:1};
+  var pu = G.prestigeUpgrades;
+  M.global *= (1 + pu.overclock * 0.1);
   M.click  *= Math.pow(2, pu.bionic);
-  M.global *= 1 + pu.warpSpeed * 0.25;
-
-  // Void tree
-  const vt = G.voidTree;
-  const resetBonus = (vt.mem_gen||0) * G.stats.voidResets * 0.005;
+  M.global *= (1 + pu.warpSpeed * 0.25);
+  var resetBonus = (G.voidTree.mem_gen || 0) * G.stats.voidResets * 0.005;
   M.global *= (1 + resetBonus);
-  M.global *= 1 + (vt.entropy_s||0) * 0;
-
-  // Research effects
-  for (const [id, done] of Object.entries(G.research)) {
-    if (!done) continue;
-    const node = RESEARCH.find(r => r.id === id);
-    if (!node) continue;
-    const eff = node.eff;
-    if (eff.startsWith('mult:')) {
-      const [,tgt,val] = eff.split(':');
-      if (M[tgt] !== undefined) M[tgt] *= parseFloat(val);
-      else if (tgt === 'global') M.global *= parseFloat(val);
+  for (var ri = 0; ri < RESEARCH.length; ri++) {
+    var node = RESEARCH[ri];
+    if (!G.research[node.id]) continue;
+    var eff = node.eff;
+    if (eff.indexOf('mult:') === 0) {
+      var parts = eff.split(':');
+      var tgt = parts[1], val = parseFloat(parts[2]);
+      if (M[tgt] !== undefined) M[tgt] *= val;
+      else if (tgt === 'global') M.global *= val;
     }
-    if (eff.startsWith('click:')) M.click *= parseFloat(eff.split(':')[1]);
+    if (eff.indexOf('click:') === 0) M.click *= parseFloat(eff.split(':')[1]);
     if (eff === 'multi:fusion_res') M.power *= 1.5;
   }
-
-  // Temporal Stabilizer bonus (handled in tick speed)
+  var tempCnt2 = G.machines['temp_stab'] || 0;
+  if (tempCnt2 > 0) M.global *= Math.pow(1.15, tempCnt2);
   return M;
 }
 
 function calcCostRate() {
-  // 1.15^Q or 1.10^Q if efficiency node bought
-  return (G.voidTree.efficiency||0) >= 1 ? 1.10 : 1.15;
+  return (G.voidTree.efficiency || 0) >= 1 ? 1.10 : 1.15;
 }
 
 function machineCost(mach, n) {
   n = n || 1;
-  const cnt = G.machines[mach.id] || 0;
-  const rate = calcCostRate() - (G.prestigeUpgrades.efficient * 0.005);
-  const costs = {};
-  for (const [res, base] of Object.entries(mach.cost)) {
-    let c = 0;
-    for (let i = 0; i < n; i++) c += base * Math.pow(rate, cnt + i);
+  var cnt = G.machines[mach.id] || 0;
+  var rate = calcCostRate() - (G.prestigeUpgrades.efficient * 0.005);
+  var costs = {};
+  var costKeys = Object.keys(mach.cost);
+  for (var i = 0; i < costKeys.length; i++) {
+    var res = costKeys[i];
+    var base = mach.cost[res];
+    var c = 0;
+    for (var j = 0; j < n; j++) c += base * Math.pow(rate, cnt + j);
     costs[res] = dc(c);
   }
   return costs;
 }
 
 function canAfford(costs) {
-  for (const [res, amt] of Object.entries(costs)) {
-    const rkey = res;
-    if (!G.res[rkey] || dc(G.res[rkey]).lt(amt)) return false;
+  var keys = Object.keys(costs);
+  for (var i = 0; i < keys.length; i++) {
+    var rk = keys[i];
+    if (!G.res[rk] || dc(G.res[rk]).lt(costs[rk])) return false;
   }
   return true;
 }
 
 function spend(costs) {
-  for (const [res, amt] of Object.entries(costs)) {
-    if (G.res[res]) {
-      G.res[res] = dc(G.res[res]).sub(amt);
-      if (dc(G.res[res]).lt(dc(0))) G.res[res] = dc(0);
+  var keys = Object.keys(costs);
+  for (var i = 0; i < keys.length; i++) {
+    var rk = keys[i];
+    if (G.res[rk]) {
+      G.res[rk] = dc(G.res[rk]).sub(costs[rk]);
+      if (dc(G.res[rk]).lt(dc(0))) G.res[rk] = dc(0);
     }
   }
 }
@@ -860,41 +885,44 @@ function spend(costs) {
 // PRODUCTION
 // ============================================================
 function calcProduction() {
-  const rates = {};
-  for (const k of Object.keys(G.res)) rates[k] = dc(0);
-  const M = calcMults();
-  const GM = M.global;
+  var rates = {};
+  var resKeys = Object.keys(G.res);
+  for (var ri = 0; ri < resKeys.length; ri++) rates[resKeys[ri]] = dc(0);
+  var M = calcMults();
+  var GM = M.global;
+  var pg = calcPowerGrid();
+  var powerMult = pg.powerMult;
 
-  for (const mach of MACHINES) {
-    const cnt = G.machines[mach.id] || 0;
+  for (var mi = 0; mi < MACHINES.length; mi++) {
+    var mach = MACHINES[mi];
+    var cnt = G.machines[mach.id] || 0;
     if (cnt <= 0) continue;
-
-    let mm = 1;
-    for (const r of RESEARCH) {
-      if (!G.research[r.id]) continue;
-      const e = r.eff;
-      if (e === `mult:${mach.id}:${e.split(':')[2]}`) mm *= parseFloat(e.split(':')[2]);
+    var mm = 1;
+    for (var rri = 0; rri < RESEARCH.length; rri++) {
+      var rnode = RESEARCH[rri];
+      if (!G.research[rnode.id]) continue;
+      var e = rnode.eff;
+      if (e === 'mult:' + mach.id + ':' + e.split(':')[2]) mm *= parseFloat(e.split(':')[2]);
       if (e === 'mult:dyson:2' && mach.tab === 'dyson') mm *= 2;
     }
-
-    for (const [res, base] of Object.entries(mach.base)) {
+    var bypassPower = (mach.base.power ? true : false) || mach.energyCost === 0;
+    var effPM = bypassPower ? 1 : powerMult;
+    var baseKeys = Object.keys(mach.base);
+    for (var bi = 0; bi < baseKeys.length; bi++) {
+      var res = baseKeys[bi];
       if (rates[res] !== undefined) {
-        const rm = M[res] || 1;
-        rates[res] = dc(rates[res]).add(dc(base * cnt * GM * mm * rm));
+        var rm = M[res] || 1;
+        rates[res] = dc(rates[res]).add(dc(mach.base[res] * cnt * GM * mm * rm * effPM));
       }
     }
-
-    // Consumes
     if (mach.consumes) {
-      for (const [res, rate] of Object.entries(mach.consumes)) {
-        if (rates[res] !== undefined) {
-          rates[res] = dc(rates[res]).sub(dc(rate * cnt * GM * mm));
-        }
+      var ckeys = Object.keys(mach.consumes);
+      for (var ci = 0; ci < ckeys.length; ci++) {
+        var cres = ckeys[ci];
+        if (rates[cres] !== undefined) rates[cres] = dc(rates[cres]).sub(dc(mach.consumes[cres] * cnt * GM * mm));
       }
     }
   }
-
-  // Logic Burner: convert Omni-Fuel to global mult (handled separately)
   return rates;
 }
 
@@ -902,18 +930,14 @@ function calcProduction() {
 // CLICK
 // ============================================================
 function clickCollect(ev) {
-  const M = calcMults();
-  const base = 1 + G.prestigeUpgrades.memoryCore * 100;
-  let power = dc(base).mul(dc(M.click));
-
-  // Overclock void node: add 1% of photon RPS per level
-  const oc = G.voidTree.overclock || 0;
+  var M = calcMults();
+  var base = 1 + G.prestigeUpgrades.memoryCore * 100;
+  var power = dc(base).mul(dc(M.click));
+  var oc = G.voidTree.overclock || 0;
   if (oc > 0) {
-    const rates = calcProduction();
-    const bonus = dc(rates.photons).mul(dc(oc * 0.01));
-    power = dc(power).add(bonus);
+    var rates0 = calcProduction();
+    power = dc(power).add(dc(rates0.photons).mul(dc(oc * 0.01)));
   }
-
   G.res.photons = dc(G.res.photons).add(power);
   G.stats.totalPhotons = dc(G.stats.totalPhotons).add(power);
   G.stats.totalClicks++;
@@ -923,13 +947,13 @@ function clickCollect(ev) {
 }
 
 function spawnFloat(x, y, txt) {
-  const el = document.createElement('div');
+  var el = document.createElement('div');
   el.className = 'float-txt';
   el.textContent = txt;
-  el.style.left = (x-20) + 'px';
-  el.style.top  = (y-10) + 'px';
+  el.style.left = (x - 20) + 'px';
+  el.style.top  = (y - 10) + 'px';
   document.body.appendChild(el);
-  setTimeout(() => el.remove(), 900);
+  setTimeout(function() { el.parentNode && el.parentNode.removeChild(el); }, 900);
 }
 
 // ============================================================
@@ -937,16 +961,18 @@ function spawnFloat(x, y, txt) {
 // ============================================================
 function buyMachine(id, n) {
   n = n || 1;
-  const mach = MACHINES.find(m => m.id === id);
+  var mach = null;
+  for (var i = 0; i < MACHINES.length; i++) { if (MACHINES[i].id === id) { mach = MACHINES[i]; break; } }
   if (!mach) return;
-  const costs = machineCost(mach, n);
+  var costs = machineCost(mach, n);
   if (!canAfford(costs)) { notify('Insufficient resources.', 'r'); return; }
   spend(costs);
   G.machines[id] = (G.machines[id] || 0) + n;
   G.stats.totalMachines++;
-  for (const res of Object.keys(mach.base)) discoverResource(res);
+  var bkeys = Object.keys(mach.base);
+  for (var bi = 0; bi < bkeys.length; bi++) discoverResource(bkeys[bi]);
   renderMachines(); checkUnlocks();
-  notify(mach.name + ' ×' + G.machines[id], 'g');
+  notify(mach.name + ' x' + G.machines[id], 'g');
 }
 
 // ============================================================
@@ -954,25 +980,25 @@ function buyMachine(id, n) {
 // ============================================================
 function buyResearch(id) {
   if (G.research[id]) return;
-  const node = RESEARCH.find(r => r.id === id);
+  var node = null;
+  for (var i = 0; i < RESEARCH.length; i++) { if (RESEARCH[i].id === id) { node = RESEARCH[i]; break; } }
   if (!node) return;
-  for (const req of node.req) if (!G.research[req]) { notify('Prerequisites not met.', 'r'); return; }
-  const costs = {};
-  for (const [r,v] of Object.entries(node.cost)) costs[r] = dc(v);
+  for (var ri = 0; ri < node.req.length; ri++) {
+    if (!G.research[node.req[ri]]) { notify('Prerequisites not met.', 'r'); return; }
+  }
+  var costs = {};
+  var ckeys = Object.keys(node.cost);
+  for (var ci = 0; ci < ckeys.length; ci++) costs[ckeys[ci]] = dc(node.cost[ckeys[ci]]);
   if (!canAfford(costs)) { notify('Insufficient resources.', 'r'); return; }
   spend(costs);
   G.research[id] = true;
-
-  const eff = node.eff;
-  if (eff.startsWith('tab:')) {
-    const tab = eff.split(':')[1];
-    G.flags[tab+'Unlocked'] = true;
+  var eff = node.eff;
+  if (eff.indexOf('tab:') === 0) {
+    var tab = eff.split(':')[1];
+    G.flags[tab + 'Unlocked'] = true;
     unlockTab(tab);
   }
-  if (eff === 'multi:fusion_res') {
-    G.flags.fusionUnlocked = true;
-  }
-
+  if (eff === 'multi:fusion_res') G.flags.fusionUnlocked = true;
   renderResearch(); renderMachines(); checkUnlocks();
   notify('Research: ' + node.name, 'v');
   log('Research complete: ' + node.name, 'tv');
@@ -982,45 +1008,48 @@ function buyResearch(id) {
 // VOID TREE
 // ============================================================
 function buyVoidNode(id) {
-  const node = VOID_TREE.find(n => n.id === id);
+  var node = null;
+  for (var i = 0; i < VOID_TREE.length; i++) { if (VOID_TREE[i].id === id) { node = VOID_TREE[i]; break; } }
   if (!node) return;
-  const cur = G.voidTree[id] || 0;
+  var cur = G.voidTree[id] || 0;
   if (cur >= node.maxLvl) { notify('Max level!', 'a'); return; }
-  const cost = dc(node.costBase * Math.pow(2, cur));
+  var cost = dc(node.costBase * Math.pow(2, cur));
   if (dc(G.voidChips).lt(cost)) { notify('Not enough Void Chips.', 'b'); return; }
   G.voidChips = dc(G.voidChips).sub(cost);
   G.voidTree[id] = cur + 1;
-  notify(node.name + ' Lv' + (cur+1), 'b');
+  notify(node.name + ' Lv' + (cur + 1), 'b');
   if (node.eff === 'codex_all') renderCodex();
   renderVoidTab();
 }
 
 function buyPrestigeUp(id) {
-  const upg = PRESTIGE_UPS.find(u => u.id === id);
-  const cur = G.prestigeUpgrades[id] || 0;
+  var upg = null;
+  for (var i = 0; i < PRESTIGE_UPS.length; i++) { if (PRESTIGE_UPS[i].id === id) { upg = PRESTIGE_UPS[i]; break; } }
+  if (!upg) return;
+  var cur = G.prestigeUpgrades[id] || 0;
   if (cur >= upg.maxLvl) { notify('Max level!', 'a'); return; }
-  const cost = dc(upg.costBase * Math.pow(2, cur));
+  var cost = dc(upg.costBase * Math.pow(2, cur));
   if (dc(G.voidChips).lt(cost)) { notify('Not enough Void Chips.', 'b'); return; }
   G.voidChips = dc(G.voidChips).sub(cost);
   G.prestigeUpgrades[id] = cur + 1;
-  notify(upg.name + ' Lv' + (cur+1), 'a');
+  notify(upg.name + ' Lv' + (cur + 1), 'a');
   renderVoidTab();
 }
 
 // ============================================================
-// VOID RESET (meeting Black Matter Man)
+// VOID RESET
 // ============================================================
 function calcVoidChips() {
-  const base = Math.max(1, Math.floor(
+  var base = Math.max(1, Math.floor(
     Math.log10(Math.max(2, parseFloat(G.stats.totalPhotons.toString()))) * 2
     + G.stats.dysonPct * 200
   ));
-  const boost = Math.pow(1.25, G.voidTree.void_acc || 0);
+  var boost = Math.pow(1.25, G.voidTree.void_acc || 0);
   return dc(Math.floor(base * boost));
 }
 
 function showBMM() {
-  const chips = calcVoidChips();
+  var chips = calcVoidChips();
   document.getElementById('bmm-chip-count').textContent = fmt(chips) + ' Void Chips';
   document.getElementById('bmm-overlay').classList.add('show');
   G.flags.bmmMet = true;
@@ -1033,56 +1062,48 @@ function closeBMM() {
 }
 
 function doVoidReset() {
-  const chips = calcVoidChips();
+  var chips = calcVoidChips();
   G.voidChips = dc(G.voidChips).add(chips);
   G.totalVoidChips = dc(G.totalVoidChips).add(chips);
   G.stats.voidResets++;
-
   G.flags.voidHistory = G.flags.voidHistory || [];
-  G.flags.voidHistory.push({run:G.stats.voidResets, chips:fmt(chips), time:fmtTime(G.stats.playtime), dyson:(G.stats.dysonPct*100).toFixed(1)+'%'});
-
-  // Reset resources and machines, keep void upgrades
+  G.flags.voidHistory.push({run:G.stats.voidResets, chips:fmt(chips), time:fmtTime(G.stats.playtime), dyson:(G.stats.dysonPct * 100).toFixed(1) + '%'});
   G.res = {photons:dc(0),power:dc(0),metal:dc(0),regolith:dc(0),copper:dc(0),silicon:dc(0),alloy:dc(0),gas:dc(0),plasma:dc(0),mH:dc(0),qgp:dc(0),neutron:dc(0),dark:dc(0),gravit:dc(0),omni:dc(0)};
-  const mc = G.prestigeUpgrades.memoryCore || 0;
+  var mc = G.prestigeUpgrades.memoryCore || 0;
   if (mc > 0) G.res.photons = dc(100 * mc);
-
-  G.machines = {};
-  G.research = {};
-  G.flags = {...G.flags, baseUnlocked:false,stellarUnlocked:false,dysonUnlocked:false,voidUnlocked:false,endingReached:false,codexDiscovered:G.flags.codexDiscovered||{}};
+  G.machines = {}; G.research = {};
+  G.flags = Object.assign({}, G.flags, {baseUnlocked:false,stellarUnlocked:false,dysonUnlocked:false,voidUnlocked:false,endingReached:false,codexDiscovered:G.flags.codexDiscovered||{}});
   G.stats.playtime = 0; G.stats.phase = 1; G.stats.dysonPct = 0; G.stats.energyLimitPct = 0;
-
-  ['base','stellar','dyson','void'].forEach(t => {
-    const b = document.getElementById('tb-'+t);
-    if (b) b.disabled = true;
-  });
+  var tabsToLock = ['base','stellar','dyson','void'];
+  for (var i = 0; i < tabsToLock.length; i++) {
+    var btn = document.getElementById('tb-' + tabsToLock[i]);
+    if (btn) btn.disabled = true;
+  }
   document.getElementById('bmm-overlay').classList.remove('show');
   document.getElementById('ending').classList.remove('show');
   document.getElementById('ending-pnl').classList.add('hidden');
   showTab('gather');
   notify('VOID RESET — +' + fmt(chips) + ' Void Chips', 'b');
   log('Universe reset. Void Chips gained: ' + fmt(chips), 'tb');
-  renderAll();
-  savGame();
+  renderAll(); savGame();
 }
 
 // ============================================================
-// ENERGY LIMIT (BMM trigger)
+// ENERGY LIMIT
 // ============================================================
-let energyLimitActive = false;
+var energyLimitActive = false;
 function updateEnergyLimit(dt) {
-  const entropyAnchors = G.machines['entropy_anch'] || 0;
-  const shieldLvl = G.voidTree.entropy_s || 0;
-  const baseRate = 0.001; // % per second
-  const reduction = entropyAnchors * 0.05 + shieldLvl * 0.10;
-  const rate = Math.max(0, baseRate * (1 - reduction));
-
+  var entropyAnchors = G.machines['entropy_anch'] || 0;
+  var shieldLvl = G.voidTree.entropy_s || 0;
+  var baseRate = 0.001;
+  var reduction = entropyAnchors * 0.05 + shieldLvl * 0.10;
+  var rate = Math.max(0, baseRate * (1 - reduction));
   if (G.stats.phase >= 3) {
     G.stats.energyLimitPct = Math.min(1, G.stats.energyLimitPct + rate * dt);
-    const fill = document.getElementById('elimit-fill');
-    const txt  = document.getElementById('elimit-txt');
+    var fill = document.getElementById('elimit-fill');
+    var txt  = document.getElementById('elimit-txt');
     if (fill) fill.style.width = (G.stats.energyLimitPct * 100) + '%';
     if (txt)  txt.textContent = 'ENERGY LIMIT: ' + (G.stats.energyLimitPct * 100).toFixed(1) + '%';
-
     if (G.stats.energyLimitPct >= 1 && !energyLimitActive) {
       energyLimitActive = true;
       setTimeout(showBMM, 2000);
@@ -1108,56 +1129,39 @@ function discoverResource(key) {
 // PHASE UNLOCKS
 // ============================================================
 function checkUnlocks() {
-  const ph = G.stats.phase;
-  const p = parseFloat(G.res.photons.toString());
-
-  // Phase 2
+  var ph = G.stats.phase;
+  var p = parseFloat(G.res.photons.toString());
   if (ph < 2 && p >= 500) {
-    G.stats.phase = 2;
-    G.flags.baseUnlocked = true;
-    unlockTab('base');
-    updatePhase();
+    G.stats.phase = 2; G.flags.baseUnlocked = true; unlockTab('base'); updatePhase();
     log('PHASE II: Planetary deposits detected. Industrial systems online.', 'tc');
     notify('Phase II: The Base unlocked!', 'a');
     setLore(2);
     document.getElementById('td-base').classList.add('show');
   }
-  // Phase 3
   if (ph < 3 && G.research['stellar_unlock']) {
-    G.stats.phase = 3;
-    G.flags.stellarUnlocked = true;
-    unlockTab('stellar');
-    updatePhase();
+    G.stats.phase = 3; G.flags.stellarUnlocked = true; unlockTab('stellar'); updatePhase();
     log('PHASE III: Star Lifter designs ready. Approaching the Sun.', 'tc');
     notify('Phase III: Stellar Age!', 'a');
     setLore(3);
     document.getElementById('td-stellar').classList.add('show');
-    energyLimitActive = false; // reset trigger guard
+    energyLimitActive = false;
   }
-  // Phase 4 (Dyson)
   if (ph < 4 && G.research['dyson_unlock']) {
-    G.stats.phase = 4;
-    G.flags.dysonUnlocked = true;
-    unlockTab('dyson');
-    updatePhase();
-    log('PHASE IV: Dyson Swarm construction begins. The star will be mine.', 'ta');
+    G.stats.phase = 4; G.flags.dysonUnlocked = true; unlockTab('dyson'); updatePhase();
+    log('PHASE IV: Dyson Swarm construction begins.', 'ta');
     notify('Phase IV: Dyson Age!', 'a');
     document.getElementById('td-dyson').classList.add('show');
   }
-  // Void tab
   if (!G.flags.voidUnlocked && G.research['void_unlock']) {
-    G.flags.voidUnlocked = true;
-    unlockTab('void');
-    updatePhase();
+    G.flags.voidUnlocked = true; unlockTab('void'); updatePhase();
     log('PHASE V: Anomaly confirmed. The Void opens.', 'tv');
     notify('Phase V: The Void unlocked!', 'b');
   }
-
-  // Dyson %
   if (G.flags.dysonUnlocked) {
-    let dp = 0;
-    for (const m of MACHINES.filter(x => x.dysonVal)) {
-      dp += (G.machines[m.id]||0) * m.dysonVal;
+    var dp = 0;
+    for (var mi = 0; mi < MACHINES.length; mi++) {
+      var mm = MACHINES[mi];
+      if (mm.dysonVal) dp += (G.machines[mm.id] || 0) * mm.dysonVal;
     }
     G.stats.dysonPct = Math.min(1, dp / 1000);
     if (G.stats.dysonPct >= 1 && !G.flags.endingReached) {
@@ -1165,41 +1169,43 @@ function checkUnlocks() {
       log('DYSON CORE COMPLETE. Choose your fate.', 'tr');
     }
   }
-
-  // Auto-discover resources from production
-  const rates = calcProduction();
-  for (const [res, rate] of Object.entries(rates)) {
-    if (parseFloat(rate.toString()) > 0) discoverResource(res);
+  var ratesChk = calcProduction();
+  var rchkKeys = Object.keys(ratesChk);
+  for (var rci = 0; rci < rchkKeys.length; rci++) {
+    if (parseFloat(ratesChk[rchkKeys[rci]].toString()) > 0) discoverResource(rchkKeys[rci]);
   }
-
-  // Research notif
-  const hasResearch = RESEARCH.some(r => {
-    if (G.research[r.id]) return false;
-    if (!r.req.every(x => G.research[x])) return false;
-    const c = {};
-    for (const [k,v] of Object.entries(r.cost)) c[k] = dc(v);
-    return canAfford(c);
-  });
+  var hasResearch = false;
+  for (var rri = 0; rri < RESEARCH.length; rri++) {
+    var rn = RESEARCH[rri];
+    if (G.research[rn.id]) continue;
+    var allReq = true;
+    for (var rj = 0; rj < rn.req.length; rj++) { if (!G.research[rn.req[rj]]) { allReq = false; break; } }
+    if (!allReq) continue;
+    var rc = {};
+    var rckeys = Object.keys(rn.cost);
+    for (var rck = 0; rck < rckeys.length; rck++) rc[rckeys[rck]] = dc(rn.cost[rckeys[rck]]);
+    if (canAfford(rc)) { hasResearch = true; break; }
+  }
   document.getElementById('td-research').classList.toggle('show', hasResearch);
 }
 
 function unlockTab(tab) {
-  const b = document.getElementById('tb-'+tab);
+  var b = document.getElementById('tb-' + tab);
   if (b) b.disabled = false;
 }
 
 function updatePhase() {
-  const phases = ['','I: THE REBOOT','II: THE BASE','III: THE STAR','IV: THE VOID','V: TRANSCENDENCE'];
+  var phases = ['','I: THE REBOOT','II: THE BASE','III: THE STAR','IV: THE VOID','V: TRANSCENDENCE'];
   document.getElementById('phase-badge').textContent = 'PHASE ' + (phases[G.stats.phase] || 'V');
   document.getElementById('vc-display').textContent = fmt(G.voidChips);
 }
 
-const LORE_TEXTS = {
+var LORE_TEXTS = {
   2: 'PHASE II — THE BASE<br>The planet has more to give. I detected mineral signatures 40km down.<br>The machines I build now will outlast me. Perhaps that is the point.',
-  3: 'PHASE III — THE STAR<br>This world has given everything. The Sun still burns — 10 trillion years of fuel.<br>I have aimed my machines at it. It does not know what is coming.',
+  3: 'PHASE III — THE STAR<br>This world has given everything. The Sun still burns — 10 trillion years of fuel.<br>I have aimed my machines at it. It does not know what is coming.'
 };
 function setLore(ph) {
-  const el = document.getElementById('lore-txt');
+  var el = document.getElementById('lore-txt');
   if (el && LORE_TEXTS[ph]) el.innerHTML = LORE_TEXTS[ph];
 }
 
@@ -1207,368 +1213,496 @@ function setLore(ph) {
 // ENDINGS
 // ============================================================
 function triggerEnding(type) {
-  const end = ENDINGS[type];
+  var end = ENDINGS[type];
   if (!end) return;
-  if (type === 'ark' && !(G.machines['dyson_tap']||0)) { notify('Build Stellar Tap Array first.','r'); return; }
-  if (type === 'hive' && !(G.machines['reality_wv']||0)) { notify('Build Reality Weaver first.','r'); return; }
-  if (type === 'void' && !(G.voidTree.void_acc >= 5)) { notify('Max Void Accumulator (5) first.','r'); return; }
-
+  if (type === 'ark'  && !(G.machines['dyson_tap']  || 0)) { notify('Build Stellar Tap Array first.', 'r'); return; }
+  if (type === 'hive' && !(G.machines['reality_wv'] || 0)) { notify('Build Reality Weaver first.', 'r'); return; }
+  if (type === 'void' && !(G.voidTree.void_acc >= 5))       { notify('Max Void Accumulator (5) first.', 'r'); return; }
   G.flags.endingReached = true;
-  const div = document.getElementById('ending');
   document.getElementById('end-title').textContent = end.title;
   document.getElementById('end-title').style.color = end.color;
   document.getElementById('end-title').style.textShadow = '0 0 40px ' + end.color;
   document.getElementById('end-sub').textContent = end.sub;
   document.getElementById('end-sub').style.color = end.color;
   document.getElementById('end-txt').textContent = end.text;
-  document.getElementById('end-stats').innerHTML = [
-    {n:fmt(G.stats.totalPhotons),l:'TOTAL PHOTONS'},
-    {n:fmtTime(G.stats.playtime),l:'PLAYTIME'},
+  var stats = [
+    {n:fmt(G.stats.totalPhotons),           l:'TOTAL PHOTONS'},
+    {n:fmtTime(G.stats.playtime),           l:'PLAYTIME'},
     {n:G.stats.totalClicks.toLocaleString(),l:'TOTAL CLICKS'},
-    {n:fmt(G.totalVoidChips),l:'VOID CHIPS EARNED'},
-  ].map(s=>`<div class="end-stat"><div class="end-stat-n" style="color:${end.color}">${s.n}</div><div class="end-stat-l">${s.l}</div></div>`).join('');
-  div.classList.add('show');
+    {n:fmt(G.totalVoidChips),               l:'VOID CHIPS EARNED'}
+  ];
+  var statsHtml = '';
+  for (var si = 0; si < stats.length; si++) {
+    statsHtml += '<div class="end-stat"><div class="end-stat-n" style="color:' + end.color + '">' + stats[si].n + '</div><div class="end-stat-l">' + stats[si].l + '</div></div>';
+  }
+  document.getElementById('end-stats').innerHTML = statsHtml;
+  document.getElementById('ending').classList.add('show');
   log('ENDING: ' + end.title, 'tr');
 }
 
 // ============================================================
-// RENDER
+// RENDER MACHINES
 // ============================================================
 function isMachineUnlocked(id) {
-  const m = MACHINES.find(x => x.id === id);
+  var m = null;
+  for (var i = 0; i < MACHINES.length; i++) { if (MACHINES[i].id === id) { m = MACHINES[i]; break; } }
   if (!m) return false;
   if (m.unlock === 'start') return true;
-  if (m.unlock === 'base_unlock') return G.flags.baseUnlocked;
+  if (m.unlock === 'base_unlock')    return G.flags.baseUnlocked;
   if (m.unlock === 'stellar_unlock') return G.flags.stellarUnlocked;
-  if (m.unlock === 'dyson_unlock') return G.flags.dysonUnlocked;
+  if (m.unlock === 'dyson_unlock')   return G.flags.dysonUnlocked;
   return !!G.research[m.unlock];
 }
 
-function renderMachines() {
-  const slots = {gather:[],base:[],stellar:[],dyson:[],void_m:[]};
-  for (const mach of MACHINES) {
-    const unlocked = isMachineUnlocked(mach.id);
-    const cnt = G.machines[mach.id] || 0;
-    const costs = machineCost(mach, 1);
-    const afford = unlocked && canAfford(costs);
-    const costStr = Object.entries(costs).map(([r,v]) => fmt(v)+' '+r).join(', ');
-    const prodStr = Object.entries(mach.base).filter(([,v])=>v>0).map(([r,v])=>'+'+v+'/s '+r).join(', ');
-    const sp = mach.special ? `<div class="mc-special">★ ${mach.special}</div>` : '';
-    const lk = !unlocked ? `<div class="mc-lock">🔒 Req: ${mach.unlock.replace(/_/g,' ')}</div>` : '';
-    const ct = afford ? `<div class="mc-can-tag">BUY</div>` : '';
-    const cls = ['mcard', unlocked?(afford?'mcan':''):'mlock', mach.tab==='void_m'?'mvoid':''].filter(Boolean).join(' ');
-    const card = `<div class="${cls}" onclick="${unlocked?`buyMachine('${mach.id}',1)`:'void 0'}">
-      ${ct}
-      <div class="mc-row"><div class="mc-name">${mach.ico} ${mach.name}</div><div class="mc-cnt">${cnt}</div></div>
-      <div class="mc-desc">${mach.desc}</div>
-      ${prodStr?`<div class="mc-prod">↑ ${prodStr}</div>`:''}
-      <div class="mc-cost">⬡ ${costStr}</div>
-      ${sp}${lk}
-    </div>`;
-    if (slots[mach.tab] !== undefined) slots[mach.tab].push(card);
+function buildMachineCard(mach) {
+  var unlocked = isMachineUnlocked(mach.id);
+  var cnt      = G.machines[mach.id] || 0;
+  var costs    = machineCost(mach, 1);
+  var afford   = unlocked && canAfford(costs);
+  var costParts = [];
+  var ck = Object.keys(costs);
+  for (var i = 0; i < ck.length; i++) costParts.push(fmt(costs[ck[i]]) + ' ' + ck[i]);
+  var costStr = costParts.join(', ');
+  var prodParts = [];
+  var bk = Object.keys(mach.base);
+  for (var j = 0; j < bk.length; j++) { if (mach.base[bk[j]] > 0) prodParts.push('+' + mach.base[bk[j]] + '/s ' + bk[j]); }
+  var prodStr = prodParts.join(', ');
+  var cls = 'mcard';
+  if (!unlocked) cls += ' mlock';
+  else if (afford) cls += ' mcan';
+  if (mach.tab === 'void_m') cls += ' mvoid';
+  var onclick = unlocked ? ('buyMachine(\'' + mach.id + '\',1)') : 'void 0';
+  var html = '<div class="' + cls + '" onclick="' + onclick + '">';
+  if (afford) html += '<div class="mc-can-tag">BUY</div>';
+  html += '<div class="mc-row"><div class="mc-name">' + mach.ico + ' ' + mach.name + '</div><div class="mc-cnt">' + cnt + '</div></div>';
+  html += '<div class="mc-desc">' + mach.desc + '</div>';
+  if (prodStr) html += '<div class="mc-prod">&#x2191; ' + prodStr + '</div>';
+  html += '<div class="mc-cost">&#x29C1; ' + costStr + '</div>';
+  if (mach.energyCost && mach.energyCost > 0) {
+    var ew = mach.energyCost >= 1000 ? (mach.energyCost / 1000).toFixed(1) + 'kW' : mach.energyCost + 'W';
+    html += '<div style="font-size:7px;color:var(--red);margin-top:2px">&#x26A1; ' + ew + ' each</div>';
   }
-  const set = (id, arr) => { const el=document.getElementById(id); if(el) el.innerHTML=arr.join(''); };
-  set('gather-machines', slots.gather);
-  set('base-machines',   slots.base);
-  set('stellar-machines',slots.stellar);
-  set('dyson-machines',  slots.dyson);
-  // Void machines rendered separately if void tab exists
-  // For now add them to a hidden void-machines-list on void tab
-  const vm = document.getElementById('void-machines');
+  if (mach.special) html += '<div class="mc-special">&#x2605; ' + mach.special + '</div>';
+  if (!unlocked) html += '<div class="mc-lock">&#x1F512; Req: ' + mach.unlock.replace(/_/g, ' ') + '</div>';
+  html += '</div>';
+  return html;
+}
+
+function renderMachines() {
+  var slots = {gather:[], base:[], stellar:[], dyson:[], void_m:[]};
+  for (var i = 0; i < MACHINES.length; i++) {
+    var mach = MACHINES[i];
+    if (slots[mach.tab] !== undefined) slots[mach.tab].push(buildMachineCard(mach));
+  }
+  var tabMap = [['gather-machines','gather'],['base-machines','base'],['stellar-machines','stellar'],['dyson-machines','dyson']];
+  for (var ti = 0; ti < tabMap.length; ti++) {
+    var el = document.getElementById(tabMap[ti][0]);
+    if (el) el.innerHTML = slots[tabMap[ti][1]].join('');
+  }
+  var vm = document.getElementById('void-machines');
   if (vm) vm.innerHTML = slots.void_m.join('');
 }
 
+// ============================================================
+// RENDER RESEARCH
+// ============================================================
 function renderResearch() {
-  const tiers = {};
-  for (const n of RESEARCH) { if(!tiers[n.tier]) tiers[n.tier]=[]; tiers[n.tier].push(n); }
-  const done = id => !!G.research[id];
-  const avail = n => !done(n.id) && n.req.every(r=>done(r));
-  const vis = n => done(n.id) || n.req.every(r=>done(r)) || G.stats.phase >= 2;
-  let html = '';
-  for (const [tier, nodes] of Object.entries(tiers)) {
-    html += `<div class="rtier">${tier}</div><div class="res-grid">`;
-    for (const node of nodes) {
-      if (!vis(node)) continue;
-      const isDone=done(node.id), isAvail=avail(node), isLock=!isDone&&!isAvail;
-      const cStr = Object.entries(node.cost).map(([r,v])=>dc(v).toString().length>8?fmt(dc(v)):Math.floor(v).toLocaleString()+' '+r).join(', ');
-      const rStr = node.req.length ? `<div class="rn-req">Req: ${node.req.map(r=>{const n2=RESEARCH.find(x=>x.id===r);return n2?n2.name:r}).join(', ')}</div>` : '';
-      html += `<div class="rnode${isDone?' rdone':(isAvail?' rcan':(isLock?' rlock':''))}" onclick="${isDone||isLock?'void 0':`buyResearch('${node.id}')`}">
-        ${isDone?'<div class="rn-check">✓</div>':''}
-        <div class="rn-name">${node.name}</div>
-        <div class="rn-desc">${node.desc}</div>
-        <div class="rn-cost">${isDone?'✓ Done':'⬡ '+cStr}</div>
-        ${rStr}
-      </div>`;
+  var tiers = {};
+  var tierOrder = [];
+  for (var i = 0; i < RESEARCH.length; i++) {
+    var tier = RESEARCH[i].tier;
+    if (!tiers[tier]) { tiers[tier] = []; tierOrder.push(tier); }
+    tiers[tier].push(RESEARCH[i]);
+  }
+  var html = '';
+  for (var ti = 0; ti < tierOrder.length; ti++) {
+    var tier = tierOrder[ti];
+    var nodes = tiers[tier];
+    html += '<div class="rtier">' + tier + '</div><div class="res-grid">';
+    for (var ni = 0; ni < nodes.length; ni++) {
+      var node = nodes[ni];
+      var isDone  = !!G.research[node.id];
+      var allReq  = true;
+      for (var ri = 0; ri < node.req.length; ri++) { if (!G.research[node.req[ri]]) { allReq = false; break; } }
+      var isAvail = !isDone && allReq;
+      var isLock  = !isDone && !allReq;
+      var visible = isDone || allReq || G.stats.phase >= 2;
+      if (!visible) continue;
+      var cParts = [];
+      var ckeys = Object.keys(node.cost);
+      for (var ci = 0; ci < ckeys.length; ci++) {
+        var cv = node.cost[ckeys[ci]];
+        var cvStr = cv >= 1e6 ? dc(cv).toString() : Math.floor(cv).toLocaleString();
+        cParts.push(cvStr + ' ' + ckeys[ci]);
+      }
+      var cStr = cParts.join(', ');
+      var rParts = [];
+      for (var rqi = 0; rqi < node.req.length; rqi++) {
+        var rnode = null;
+        for (var rx = 0; rx < RESEARCH.length; rx++) { if (RESEARCH[rx].id === node.req[rqi]) { rnode = RESEARCH[rx]; break; } }
+        rParts.push(rnode ? rnode.name : node.req[rqi]);
+      }
+      var nodeCls = 'rnode' + (isDone ? ' rdone' : (isAvail ? ' rcan' : (isLock ? ' rlock' : '')));
+      var nodeClick = (isDone || isLock) ? 'void 0' : ('buyResearch(\'' + node.id + '\')');
+      html += '<div class="' + nodeCls + '" onclick="' + nodeClick + '">';
+      if (isDone) html += '<div class="rn-check">&#x2713;</div>';
+      html += '<div class="rn-name">' + node.name + '</div>';
+      html += '<div class="rn-desc">' + node.desc + '</div>';
+      html += '<div class="rn-cost">' + (isDone ? '&#x2713; Done' : ('&#x29C1; ' + cStr)) + '</div>';
+      if (rParts.length) html += '<div class="rn-req">Req: ' + rParts.join(', ') + '</div>';
+      html += '</div>';
     }
     html += '</div>';
   }
   document.getElementById('research-content').innerHTML = html;
 }
 
+// ============================================================
+// RENDER VOID TAB
+// ============================================================
 function renderVoidTab() {
   document.getElementById('vc-total').textContent = fmt(G.voidChips);
   document.getElementById('vc-display').textContent = fmt(G.voidChips);
-
-  // Void tree
-  const tree = document.getElementById('void-tree');
+  var tree = document.getElementById('void-tree');
   if (tree) {
-    tree.innerHTML = VOID_TREE.map(node => {
-      const cur = G.voidTree[node.id] || 0;
-      const maxed = cur >= node.maxLvl;
-      const cost = dc(node.costBase * Math.pow(2, cur));
-      const locked = false; // all available if void unlocked
-      return `<div class="vnode${maxed?' vmaxed':''}${locked?' vlocked':''}" onclick="${maxed||locked?'void 0':`buyVoidNode('${node.id}')`}">
-        <div class="vn-ico">${node.ico}</div>
-        <div class="vn-info">
-          <div class="vn-name">${node.name}</div>
-          <div class="vn-desc">${node.desc}</div>
-          <div class="vn-cost">${maxed?'MAXED':fmt(cost)+' Void Chips'}</div>
-        </div>
-        <div class="vn-lvl">${cur}<div style="font-size:6px;color:rgba(102,0,255,.4)">/${node.maxLvl}</div></div>
-      </div>`;
-    }).join('');
+    var th = '';
+    for (var i = 0; i < VOID_TREE.length; i++) {
+      var node = VOID_TREE[i];
+      var cur   = G.voidTree[node.id] || 0;
+      var maxed = cur >= node.maxLvl;
+      var cost  = dc(node.costBase * Math.pow(2, cur));
+      var nc = maxed ? 'vnode vmaxed' : 'vnode';
+      var nclick = maxed ? 'void 0' : ('buyVoidNode(\'' + node.id + '\')');
+      th += '<div class="' + nc + '" onclick="' + nclick + '">';
+      th += '<div class="vn-ico">' + node.ico + '</div>';
+      th += '<div class="vn-info"><div class="vn-name">' + node.name + '</div>';
+      th += '<div class="vn-desc">' + node.desc + '</div>';
+      th += '<div class="vn-cost">' + (maxed ? 'MAXED' : fmt(cost) + ' Void Chips') + '</div></div>';
+      th += '<div class="vn-lvl">' + cur + '<div style="font-size:6px;color:rgba(102,0,255,.4)">/' + node.maxLvl + '</div></div>';
+      th += '</div>';
+    }
+    tree.innerHTML = th;
   }
-
-  // Prestige shop
-  const shop = document.getElementById('prestige-shop');
+  var shop = document.getElementById('prestige-shop');
   if (shop) {
-    shop.innerHTML = PRESTIGE_UPS.map(upg => {
-      const cur = G.prestigeUpgrades[upg.id] || 0;
-      const maxed = cur >= upg.maxLvl;
-      const cost = dc(upg.costBase * Math.pow(2, cur));
-      return `<div class="pup${maxed?' pmaxed':''}" onclick="${maxed?'void 0':`buyPrestigeUp('${upg.id}')`}">
-        <div class="pup-ico">${upg.ico}</div>
-        <div class="pup-info">
-          <div class="pup-name">${upg.name}</div>
-          <div class="pup-desc">${upg.desc}</div>
-          <div class="pup-cost">${maxed?'MAX':fmt(cost)+' Void Chips'}</div>
-        </div>
-        <div class="pup-lvl">${cur}<div style="font-size:6px;color:rgba(255,165,0,.4)">/${upg.maxLvl}</div></div>
-      </div>`;
-    }).join('');
+    var sh = '';
+    for (var pi = 0; pi < PRESTIGE_UPS.length; pi++) {
+      var upg  = PRESTIGE_UPS[pi];
+      var pcur = G.prestigeUpgrades[upg.id] || 0;
+      var pmaxed = pcur >= upg.maxLvl;
+      var pcost  = dc(upg.costBase * Math.pow(2, pcur));
+      var pc = pmaxed ? 'pup pmaxed' : 'pup';
+      var pclick = pmaxed ? 'void 0' : ('buyPrestigeUp(\'' + upg.id + '\')');
+      sh += '<div class="' + pc + '" onclick="' + pclick + '">';
+      sh += '<div class="pup-ico">' + upg.ico + '</div>';
+      sh += '<div class="pup-info"><div class="pup-name">' + upg.name + '</div>';
+      sh += '<div class="pup-desc">' + upg.desc + '</div>';
+      sh += '<div class="pup-cost">' + (pmaxed ? 'MAX' : fmt(pcost) + ' Void Chips') + '</div></div>';
+      sh += '<div class="pup-lvl">' + pcur + '<div style="font-size:6px;color:rgba(255,165,0,.4)">/' + upg.maxLvl + '</div></div>';
+      sh += '</div>';
+    }
+    shop.innerHTML = sh;
   }
-
-  // Void history
-  const hist = document.getElementById('void-history');
+  var hist = document.getElementById('void-history');
   if (hist) {
-    const h = G.flags.voidHistory || [];
-    hist.innerHTML = h.length ? h.slice(-8).reverse().map(v =>
-      `<div class="srow"><span class="sl">Run #${v.run} — ${v.time}</span><span class="sv">+${v.chips} VC · ${v.dyson}</span></div>`
-    ).join('') : '<div style="color:var(--text-d);font-size:8px">No void resets yet. Meet the Black Matter Man.</div>';
+    var h = G.flags.voidHistory || [];
+    if (!h.length) {
+      hist.innerHTML = '<div style="color:var(--text-d);font-size:8px">No void resets yet. Meet the Black Matter Man.</div>';
+    } else {
+      var hh = '';
+      var start = Math.max(0, h.length - 8);
+      for (var hi = h.length - 1; hi >= start; hi--) {
+        hh += '<div class="srow"><span class="sl">Run #' + h[hi].run + ' — ' + h[hi].time + '</span><span class="sv">+' + h[hi].chips + ' VC · ' + h[hi].dyson + '</span></div>';
+      }
+      hist.innerHTML = hh;
+    }
   }
-
-  // Void machines (if section exists)
   renderMachines();
 }
 
+// ============================================================
+// RENDER CODEX
+// ============================================================
 function renderCodex() {
-  const el = document.getElementById('codex-content');
+  var el = document.getElementById('codex-content');
   if (!el) return;
-  const voidSight = (G.voidTree.void_sight||0) >= 1 || (G.prestigeUpgrades.voidSight||0) >= 1;
-  const rates = calcProduction();
-  let html = '';
-  for (const [key, lore] of Object.entries(RES_LORE)) {
-    const discovered = G.flags.codexDiscovered[key];
+  var voidSight = (G.voidTree.void_sight || 0) >= 1 || (G.prestigeUpgrades.voidSight || 0) >= 1;
+  var rates = calcProduction();
+  var html = '';
+  var loreKeys = Object.keys(RES_LORE);
+  for (var i = 0; i < loreKeys.length; i++) {
+    var key  = loreKeys[i];
+    var lore = RES_LORE[key];
+    var discovered = G.flags.codexDiscovered[key];
     if (!discovered && !voidSight) {
-      html += `<div class="codex-entry" style="opacity:.25"><div class="cx-hdr"><div class="cx-name">??? UNKNOWN ???</div><div class="cx-tags"><span class="cx-tag">UNDISCOVERED</span></div></div></div>`;
+      html += '<div class="codex-entry" style="opacity:.25"><div class="cx-hdr"><div class="cx-name">??? UNKNOWN ???</div><div class="cx-tags"><span class="cx-tag">UNDISCOVERED</span></div></div></div>';
       continue;
     }
-    const val = G.res[key] ? fmt(G.res[key]) : '0';
-    const rps  = rates[key] ? fmt(rates[key]) : '0';
-    const rpsN = rates[key] ? parseFloat(rates[key].toString()) : 0;
-    const minsToFull = rpsN > 0 ? '∞ storage' : '—';
-    const isNew = discovered && G.flags.codexDiscovered[key+'_new'];
-    html += `<div class="codex-entry${isNew?' new':''}">
-      <div class="cx-hdr">
-        <div class="cx-name">${lore.ico} ${lore.name}</div>
-        <div class="cx-tags">
-          ${discovered?'<span class="cx-tag tc">KNOWN</span>':'<span class="cx-tag" style="color:var(--void-p)">SIGHT</span>'}
-        </div>
-      </div>
-      <div class="cx-lore">${lore.lore}</div>
-      <div class="cx-stats">
-        <div class="cx-stat"><span class="cx-sl">SOURCE: </span><span class="cx-sv">${lore.source}</span></div>
-        <div class="cx-stat"><span class="cx-sl">USAGE: </span><span class="cx-sv">${lore.usage}</span></div>
-        <div class="cx-stat"><span class="cx-sl">CURRENT: </span><span class="cx-sv">${val}</span></div>
-        <div class="cx-stat"><span class="cx-sl">RPS: </span><span class="cx-sv">${rps > 0 ? '+'+rps : '0'}/s</span></div>
-      </div>
-    </div>`;
+    var val  = G.res[key] ? fmt(G.res[key]) : '0';
+    var rps  = rates[key] ? fmt(rates[key]) : '0';
+    var rpsN = rates[key] ? parseFloat(rates[key].toString()) : 0;
+    html += '<div class="codex-entry' + (discovered ? '' : '') + '">';
+    html += '<div class="cx-hdr"><div class="cx-name">' + lore.ico + ' ' + lore.name + '</div>';
+    html += '<div class="cx-tags">' + (discovered ? '<span class="cx-tag tc">KNOWN</span>' : '<span class="cx-tag" style="color:var(--void-p)">SIGHT</span>') + '</div></div>';
+    html += '<div class="cx-lore">' + lore.lore + '</div>';
+    html += '<div class="cx-stats">';
+    html += '<div class="cx-stat"><span class="cx-sl">SOURCE: </span><span class="cx-sv">' + lore.source + '</span></div>';
+    html += '<div class="cx-stat"><span class="cx-sl">USAGE: </span><span class="cx-sv">' + lore.usage + '</span></div>';
+    html += '<div class="cx-stat"><span class="cx-sl">CURRENT: </span><span class="cx-sv">' + val + '</span></div>';
+    html += '<div class="cx-stat"><span class="cx-sl">RPS: </span><span class="cx-sv">' + (rpsN > 0 ? '+' + rps : '0') + '/s</span></div>';
+    html += '</div></div>';
   }
   el.innerHTML = html;
 }
 
+// ============================================================
+// RENDER HUD
+// ============================================================
 function renderHUD() {
-  const rates = calcProduction();
-  const M = calcMults();
-  const resMap = [
-    ['photons','photons'],['power','power'],['metal','metal'],
-    ['regolith','regolith'],['copper','copper'],['silicon','silicon'],
-    ['alloy','alloy'],['gas','gas'],['plasma','plasma'],
-    ['mH','mH'],['qgp','qgp'],['neutron','neutron'],
+  var rates = calcProduction();
+  var M = calcMults();
+  var resMap = [
+    ['photons','photons'],['power','power'],['metal','metal'],['regolith','regolith'],
+    ['copper','copper'],['silicon','silicon'],['alloy','alloy'],['gas','gas'],
+    ['plasma','plasma'],['mH','mH'],['qgp','qgp'],['neutron','neutron'],
     ['dark','dark'],['gravit','gravit'],['omni','omni']
   ];
-  for (const [rk, uid] of resMap) {
-    const ve = document.getElementById('rv-'+uid);
-    const re = document.getElementById('rr-'+uid);
-    const ri = document.getElementById('ri-'+uid);
+  for (var i = 0; i < resMap.length; i++) {
+    var rk = resMap[i][0], uid = resMap[i][1];
+    var ve = document.getElementById('rv-' + uid);
+    var re = document.getElementById('rr-' + uid);
+    var ri = document.getElementById('ri-' + uid);
     if (ve) ve.textContent = fmt(G.res[rk]);
-    const rpsN = rates[rk] ? parseFloat(rates[rk].toString()) : 0;
-    if (re) re.textContent = rpsN !== 0 ? (rpsN>0?'+':'')+fmt(rates[rk])+'/s' : '';
-    if (ri && (parseFloat(G.res[rk].toString())>0 || rpsN>0)) ri.classList.add('on');
+    var rpsN = rates[rk] ? parseFloat(rates[rk].toString()) : 0;
+    if (re) re.textContent = rpsN !== 0 ? (rpsN > 0 ? '+' : '') + fmt(rates[rk]) + '/s' : '';
+    if (ri && (parseFloat(G.res[rk].toString()) > 0 || rpsN > 0)) ri.classList.add('on');
   }
-  // Click info
   document.getElementById('click-power').textContent = fmt(dc(M.click));
   document.getElementById('click-mult').textContent = 'x' + M.global.toFixed(2);
-  // Dyson ring
-  const dp = G.stats.dysonPct;
-  const ro = document.getElementById('ring-outer');
-  const rm = document.getElementById('ring-mid');
-  const ri2 = document.getElementById('ring-inner');
-  if (ro) ro.setAttribute('stroke-dasharray', (440*dp)+' 440');
-  if (rm) rm.setAttribute('stroke-dasharray', (339*Math.min(1,dp*1.3))+' 339');
-  if (ri2) ri2.setAttribute('stroke-dasharray', (239*Math.min(1,dp*2))+' 239');
-  document.getElementById('ring-pct').textContent = (dp*100).toFixed(1)+'%';
-  // Prod rates panel
-  const pr = document.getElementById('prod-rates');
-  if (pr) {
-    pr.innerHTML = Object.entries(rates)
-      .filter(([,v])=>parseFloat(v.toString())!==0)
-      .map(([k,v])=>`<div class="srow"><span class="sl">${k.toUpperCase()}</span><span class="sv">${parseFloat(v.toString())>0?'+':''}${fmt(v)}/s</span></div>`)
-      .join('') || '<div style="font-size:8px;color:var(--text-d)">Build machines to generate resources.</div>';
+  var dp = G.stats.dysonPct;
+  var ro = document.getElementById('ring-outer');
+  var rm2 = document.getElementById('ring-mid');
+  var ri2 = document.getElementById('ring-inner');
+  if (ro)  ro.setAttribute('stroke-dasharray',  (440 * dp) + ' 440');
+  if (rm2) rm2.setAttribute('stroke-dasharray', (339 * Math.min(1, dp * 1.3)) + ' 339');
+  if (ri2) ri2.setAttribute('stroke-dasharray', (239 * Math.min(1, dp * 2)) + ' 239');
+  document.getElementById('ring-pct').textContent = (dp * 100).toFixed(1) + '%';
+  var pg = calcPowerGrid();
+  var pgFill = document.getElementById('pgrid-fill');
+  var pgTxt  = document.getElementById('pgrid-txt');
+  var pgWarn = document.getElementById('pgrid-warn');
+  if (pgFill) {
+    var pct = pg.demand <= 0 ? 100 : Math.min(100, pg.ratio * 100);
+    pgFill.style.width = pct + '%';
+    pgFill.style.background = pg.deficit ? 'linear-gradient(90deg,var(--red),var(--amber))' : 'linear-gradient(90deg,var(--green),#00ff88)';
+  }
+  if (pgTxt) {
+    var supplyStr = pg.supply >= 1000 ? (pg.supply / 1000).toFixed(1) + 'kW' : pg.supply.toFixed(0) + 'W';
+    var demandStr = pg.demand >= 1000 ? (pg.demand / 1000).toFixed(1) + 'kW' : pg.demand.toFixed(0) + 'W';
+    pgTxt.textContent = 'PWR: ' + supplyStr + ' / ' + demandStr;
+    pgTxt.style.color = pg.deficit ? 'var(--red)' : 'var(--green)';
+  }
+  if (pgWarn) pgWarn.style.display = pg.deficit ? 'block' : 'none';
+  var prEl = document.getElementById('prod-rates');
+  if (prEl) {
+    var prH = '';
+    var prKeys = Object.keys(rates);
+    for (var pri = 0; pri < prKeys.length; pri++) {
+      var prN = parseFloat(rates[prKeys[pri]].toString());
+      if (prN !== 0) prH += '<div class="srow"><span class="sl">' + prKeys[pri].toUpperCase() + '</span><span class="sv">' + (prN > 0 ? '+' : '') + fmt(rates[prKeys[pri]]) + '/s</span></div>';
+    }
+    prEl.innerHTML = prH || '<div style="font-size:8px;color:var(--text-d)">Build machines to generate resources.</div>';
   }
 }
 
+// ============================================================
+// RENDER STATS
+// ============================================================
 function renderStats() {
-  const M = calcMults();
-  document.getElementById('stats-content').innerHTML = `
-    <div class="srow"><span class="sl">Phase</span><span class="sv">${G.stats.phase}</span></div>
-    <div class="srow"><span class="sl">Total Clicks</span><span class="sv">${G.stats.totalClicks.toLocaleString()}</span></div>
-    <div class="srow"><span class="sl">Total Photons Ever</span><span class="sv">${fmt(G.stats.totalPhotons)}</span></div>
-    <div class="srow"><span class="sl">Total Machines Built</span><span class="sv">${G.stats.totalMachines}</span></div>
-    <div class="srow"><span class="sl">Playtime</span><span class="sv">${fmtTime(G.stats.playtime)}</span></div>
-    <div class="srow"><span class="sl">Void Resets</span><span class="sv">${G.stats.voidResets}</span></div>
-    <div class="srow"><span class="sl">Total Void Chips</span><span class="sv">${fmt(G.totalVoidChips)}</span></div>
-    <div class="srow"><span class="sl">Dyson Progress</span><span class="sv">${(G.stats.dysonPct*100).toFixed(2)}%</span></div>
-    <div class="srow"><span class="sl">Energy Limit</span><span class="sv">${(G.stats.energyLimitPct*100).toFixed(1)}%</span></div>
-    <div class="srow"><span class="sl">Global Mult</span><span class="sv">x${M.global.toFixed(3)}</span></div>
-    <div class="srow"><span class="sl">Cost Rate</span><span class="sv">1.${calcCostRate()===1.10?'10':'15'}^Q</span></div>
-  `;
+  var M = calcMults();
+  var pg = calcPowerGrid();
+  var ssup = pg.supply >= 1000 ? (pg.supply / 1000).toFixed(2) + 'kW' : pg.supply.toFixed(1) + 'W';
+  var sdem = pg.demand >= 1000 ? (pg.demand / 1000).toFixed(2) + 'kW' : pg.demand.toFixed(1) + 'W';
+  var sh = '';
+  sh += '<div class="srow"><span class="sl">Phase</span><span class="sv">' + G.stats.phase + '</span></div>';
+  sh += '<div class="srow"><span class="sl">Total Clicks</span><span class="sv">' + G.stats.totalClicks.toLocaleString() + '</span></div>';
+  sh += '<div class="srow"><span class="sl">Total Photons</span><span class="sv">' + fmt(G.stats.totalPhotons) + '</span></div>';
+  sh += '<div class="srow"><span class="sl">Machines Built</span><span class="sv">' + G.stats.totalMachines + '</span></div>';
+  sh += '<div class="srow"><span class="sl">Playtime</span><span class="sv">' + fmtTime(G.stats.playtime) + '</span></div>';
+  sh += '<div class="srow"><span class="sl">Void Resets</span><span class="sv">' + G.stats.voidResets + '</span></div>';
+  sh += '<div class="srow"><span class="sl">Total Void Chips</span><span class="sv">' + fmt(G.totalVoidChips) + '</span></div>';
+  sh += '<div class="srow"><span class="sl">Dyson Progress</span><span class="sv">' + (G.stats.dysonPct * 100).toFixed(2) + '%</span></div>';
+  sh += '<div class="srow"><span class="sl">Energy Limit</span><span class="sv">' + (G.stats.energyLimitPct * 100).toFixed(1) + '%</span></div>';
+  sh += '<div class="srow"><span class="sl">Global Mult</span><span class="sv">x' + M.global.toFixed(3) + '</span></div>';
+  sh += '<div class="srow"><span class="sl">Cost Rate</span><span class="sv">1.' + (calcCostRate() === 1.10 ? '10' : '15') + '^Q</span></div>';
+  sh += '<div style="margin-top:8px;font-family:var(--font-d);font-size:7px;color:var(--text-d);letter-spacing:.15em;margin-bottom:5px">POWER GRID</div>';
+  sh += '<div class="srow"><span class="sl">Power Supply</span><span class="sv" style="color:var(--green)">' + ssup + '/s</span></div>';
+  sh += '<div class="srow"><span class="sl">Power Demand</span><span class="sv" style="color:' + (pg.deficit ? 'var(--red)' : 'var(--text)') + '">' + sdem + '/s</span></div>';
+  sh += '<div class="srow"><span class="sl">Grid Coverage</span><span class="sv" style="color:' + (pg.deficit ? 'var(--red)' : 'var(--green)') + '">' + (pg.ratio * 100).toFixed(1) + '%</span></div>';
+  sh += '<div class="srow"><span class="sl">Prod. Penalty</span><span class="sv" style="color:' + (pg.deficit ? 'var(--red)' : 'var(--green)') + '">' + (pg.deficit ? 'x' + pg.powerMult.toFixed(2) : 'NONE') + '</span></div>';
+  sh += '<div class="srow"><span class="sl">Time in Deficit</span><span class="sv" style="color:var(--red)">' + fmtTime(G.stats.powerDeficitTime || 0) + '</span></div>';
+  document.getElementById('stats-content').innerHTML = sh;
 }
 
 function renderAll() {
-  renderMachines();
-  renderResearch();
-  renderVoidTab();
-  renderCodex();
-  renderStats();
-  renderHUD();
-  updatePhase();
+  renderMachines(); renderResearch(); renderVoidTab(); renderCodex(); renderStats(); renderHUD(); updatePhase();
 }
 
 // ============================================================
 // TABS
 // ============================================================
-const ALL_TABS = ['gather','base','stellar','dyson','research','void','codex','stats'];
+var ALL_TABS = ['gather','base','stellar','dyson','research','void','codex','stats'];
 function showTab(tab) {
-  for (const t of ALL_TABS) {
-    document.getElementById('tab-'+t)?.classList.toggle('hidden', t !== tab);
-    document.getElementById('tb-'+t)?.classList.toggle('active', t === tab);
+  for (var i = 0; i < ALL_TABS.length; i++) {
+    var t = ALL_TABS[i];
+    var tabEl = document.getElementById('tab-' + t);
+    var tbEl  = document.getElementById('tb-' + t);
+    if (tabEl) { if (t !== tab) tabEl.classList.add('hidden'); else tabEl.classList.remove('hidden'); }
+    if (tbEl)  { if (t === tab) tbEl.classList.add('active'); else tbEl.classList.remove('active'); }
   }
   if (tab === 'research') renderResearch();
   if (tab === 'void')     renderVoidTab();
   if (tab === 'codex')    renderCodex();
   if (tab === 'stats')    renderStats();
-  const dot = document.getElementById('td-'+tab);
+  var dot = document.getElementById('td-' + tab);
   if (dot) dot.classList.remove('show');
 }
 
 // ============================================================
-// LOG
+// LOG + NOTIFY
 // ============================================================
 function log(msg, cls) {
-  const now = new Date();
-  const ts = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0');
-  const el = document.createElement('div');
-  el.style.cssText = 'display:flex;gap:8px;padding:3px 0;border-bottom:1px solid var(--border);animation:nIn .2s ease';
-  el.innerHTML = `<span style="font-size:7px;color:var(--text-d);white-space:nowrap;min-width:40px">${ts}</span><span style="font-size:9px" class="${cls||''}">${msg}</span>`;
-  const s = document.getElementById('slog');
+  var now = new Date();
+  var ts = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+  var el = document.createElement('div');
+  el.style.cssText = 'display:flex;gap:8px;padding:3px 0;border-bottom:1px solid var(--border)';
+  el.innerHTML = '<span style="font-size:7px;color:var(--text-d);white-space:nowrap;min-width:40px">' + ts + '</span><span style="font-size:9px" class="' + (cls || '') + '">' + msg + '</span>';
+  var s = document.getElementById('slog');
   if (!s) return;
-  s.prepend(el);
-  while (s.children.length > 80) s.lastElementChild.remove();
+  s.insertBefore(el, s.firstChild);
+  while (s.children.length > 80) s.removeChild(s.lastChild);
 }
 
 function notify(msg, type) {
-  const el = document.createElement('div');
-  el.className = 'notif ' + (type||'');
+  var el = document.createElement('div');
+  el.className = 'notif ' + (type || '');
   el.textContent = msg;
   document.getElementById('notifs').appendChild(el);
-  setTimeout(() => el.remove(), 3100);
+  setTimeout(function() { if (el.parentNode) el.parentNode.removeChild(el); }, 3100);
 }
 
 // ============================================================
 // SAVE / LOAD
 // ============================================================
-function dcRep(k, v) {
-  try { if (v && typeof v === 'object' && 'sign' in v && 'mag' in v) return v; } catch(e){}
-  if (v && typeof v === 'object' && v.constructor && v.constructor.name === 'Decimal') {
-    return {__dc:true, s:v.toString()};
-  }
+function decToStr(v) {
+  if (v && typeof v === 'object' && v.constructor && v.constructor.name === 'Decimal') return {__dc:true, s:v.toString()};
   return v;
 }
-function dcRev(k, v) {
+function strToDec(v) {
   if (v && v.__dc) return dc(v.s);
   return v;
 }
 
+// ── OFFLINE GAINS ──────────────────────────────────────────
+var OFFLINE_EFFICIENCY = 0.5;
+var MAX_OFFLINE_SEC    = 28800;
+
+function computeOfflineGains(seconds) {
+  var rates  = calcProduction();
+  var gained = {};
+  var rkeys  = Object.keys(rates);
+  for (var i = 0; i < rkeys.length; i++) {
+    var res = rkeys[i];
+    var n = parseFloat(rates[res].toString());
+    if (n <= 0) continue;
+    var amount = dc(n * seconds * OFFLINE_EFFICIENCY);
+    G.res[res] = dc(G.res[res]).add(amount);
+    if (parseFloat(G.res[res].toString()) < 0) G.res[res] = dc(0);
+    if (res === 'photons') G.stats.totalPhotons = dc(G.stats.totalPhotons).add(amount);
+    gained[res] = amount;
+    discoverResource(res);
+  }
+  return {seconds: seconds, gained: gained};
+}
+
+function showOfflineModal(data) {
+  if (!data) return;
+  var seconds = data.seconds;
+  var gained  = data.gained;
+  var gkeys   = Object.keys(gained);
+  var lines   = '';
+  for (var i = 0; i < gkeys.length; i++) {
+    var rk = gkeys[i];
+    if (parseFloat(gained[rk].toString()) > 0) {
+      lines += '<div class="srow"><span class="sl">' + rk.toUpperCase() + '</span><span class="sv">+' + fmt(gained[rk]) + '</span></div>';
+    }
+  }
+  var otime = document.getElementById('offline-time');
+  var ogain = document.getElementById('offline-gains');
+  if (otime) otime.textContent = fmtTime(seconds);
+  if (ogain) ogain.innerHTML  = lines || '<div style="color:var(--text-d);font-size:9px">No passive production yet.</div>';
+  var om = document.getElementById('offline-modal');
+  if (om) om.classList.add('show');
+}
+
+function closeOfflineModal() {
+  var el = document.getElementById('offline-modal');
+  if (el) el.classList.remove('show');
+}
+
 function savGame() {
   try {
-    const raw = JSON.stringify(G, (k,v) => {
+    G.lastSaveTime = Date.now();
+    var raw = JSON.stringify(G, function(k, v) {
       if (v && typeof v === 'object' && v.constructor && v.constructor.name === 'Decimal') return {__dc:true, s:v.toString()};
       return v;
     });
-    const b64 = btoa(unescape(encodeURIComponent(raw)));
+    var b64 = btoa(unescape(encodeURIComponent(raw)));
     localStorage.setItem('tls_dyson_v3', b64);
-    const dot = document.getElementById('svdot');
   } catch(e) { console.warn('Save error', e); }
 }
 
 function loadGame() {
   try {
-    const b64 = localStorage.getItem('tls_dyson_v3');
+    var b64 = localStorage.getItem('tls_dyson_v3');
     if (!b64) return false;
-    const raw = decodeURIComponent(escape(atob(b64)));
-    const data = JSON.parse(raw, (k, v) => {
+    var raw  = decodeURIComponent(escape(atob(b64)));
+    var data = JSON.parse(raw, function(k, v) {
       if (v && v.__dc) return dc(v.s);
       return v;
     });
-    if (data.res)              G.res = {...G.res, ...data.res};
-    if (data.machines)         G.machines = data.machines;
-    if (data.research)         G.research = data.research;
-    if (data.voidChips !== undefined) G.voidChips = dc(data.voidChips);
+    if (data.res)              G.res             = Object.assign({}, G.res, data.res);
+    if (data.machines)         G.machines        = data.machines;
+    if (data.research)         G.research        = data.research;
+    if (data.voidChips  !== undefined) G.voidChips      = dc(data.voidChips);
     if (data.totalVoidChips !== undefined) G.totalVoidChips = dc(data.totalVoidChips);
-    if (data.voidTree)         G.voidTree = data.voidTree;
-    if (data.prestigeUpgrades) G.prestigeUpgrades = {...G.prestigeUpgrades, ...data.prestigeUpgrades};
-    if (data.stats)            G.stats = {...G.stats, ...data.stats};
-    if (data.flags)            G.flags = {...G.flags, ...data.flags};
-    // Restore tabs
+    if (data.voidTree)         G.voidTree        = data.voidTree;
+    if (data.prestigeUpgrades) G.prestigeUpgrades= Object.assign({}, G.prestigeUpgrades, data.prestigeUpgrades);
+    if (data.stats)            G.stats           = Object.assign({}, G.stats, data.stats);
+    if (data.flags)            G.flags           = Object.assign({}, G.flags, data.flags);
     if (G.flags.baseUnlocked)    unlockTab('base');
     if (G.flags.stellarUnlocked) unlockTab('stellar');
     if (G.flags.dysonUnlocked)   unlockTab('dyson');
     if (G.flags.voidUnlocked)    unlockTab('void');
     updatePhase();
+    var savedAt    = data.lastSaveTime || Date.now();
+    var offlineSec = Math.min((Date.now() - savedAt) / 1000, MAX_OFFLINE_SEC);
+    if (offlineSec > 30) G._offlineGains = computeOfflineGains(offlineSec);
     return true;
   } catch(e) { console.warn('Load error', e); return false; }
 }
 
 function manualSave() { savGame(); notify('Game saved.', 'g'); }
+
 function confirmReset() {
-  if (confirm('HARD RESET: Delete ALL data including Void Chips? Cannot be undone.')) {
+  if (confirm('HARD RESET: Delete ALL data including Void Chips?')) {
     localStorage.removeItem('tls_dyson_v3'); location.reload();
   }
 }
+
 function exportSave() {
   try {
-    const raw = JSON.stringify(G, (k,v) => {
+    var raw = JSON.stringify(G, function(k, v) {
       if (v && typeof v === 'object' && v.constructor && v.constructor.name === 'Decimal') return {__dc:true, s:v.toString()};
       return v;
     });
@@ -1576,9 +1710,10 @@ function exportSave() {
     notify('Exported. Copy the text above.', 'g');
   } catch(e) { notify('Export failed.', 'r'); }
 }
+
 function importSave() {
   try {
-    const raw = decodeURIComponent(escape(atob(document.getElementById('save-area').value.trim())));
+    var raw = decodeURIComponent(escape(atob(document.getElementById('save-area').value.trim())));
     localStorage.setItem('tls_dyson_v3', btoa(unescape(encodeURIComponent(raw))));
     location.reload();
   } catch(e) { notify('Invalid save data.', 'r'); }
@@ -1587,115 +1722,123 @@ function importSave() {
 // ============================================================
 // GAME LOOP
 // ============================================================
-let lastTime = Date.now();
-let tickAcc = 0;
-const BASE_TICK = 50; // 20 ticks/sec base
+var lastTime = Date.now();
+var tickAcc  = 0;
+var BASE_TICK = 50;
 
 function gameLoop() {
-  const now = Date.now();
-  const rawDt = (now - lastTime) / 1000;
-  lastTime = now;
-
-  // Temporal stabilizer speeds up ticks
-  const tempCnt = G.machines['temp_stab'] || 0;
-  const speedMult = Math.pow(1.15, tempCnt) * (1 + G.prestigeUpgrades.warpSpeed * 0.25);
-  const effectiveDt = rawDt * speedMult;
-
-  tickAcc += effectiveDt;
-  const tickSize = BASE_TICK / 1000;
-
+  var now   = Date.now();
+  var rawDt = (now - lastTime) / 1000;
+  lastTime  = now;
+  var tempCnt  = G.machines['temp_stab'] || 0;
+  var speedMult = Math.pow(1.15, tempCnt) * (1 + G.prestigeUpgrades.warpSpeed * 0.25);
+  var effDt = rawDt * speedMult;
+  tickAcc += effDt;
+  var tickSize = BASE_TICK / 1000;
   if (tickAcc >= tickSize) {
-    const ticks = Math.floor(tickAcc / tickSize);
+    var ticks = Math.floor(tickAcc / tickSize);
     tickAcc -= ticks * tickSize;
-    const dt = ticks * tickSize;
-
-    const rates = calcProduction();
-    for (const [res, rate] of Object.entries(rates)) {
-      if (G.res[res] !== undefined) {
-        G.res[res] = dc(G.res[res]).add(dc(rate).mul(dc(dt)));
-        if (parseFloat(G.res[res].toString()) < 0) G.res[res] = dc(0);
-        if (res === 'photons') G.stats.totalPhotons = dc(G.stats.totalPhotons).add(dc(rate).mul(dc(dt)));
+    var dt = ticks * tickSize;
+    var rates = calcProduction();
+    var rkeys2 = Object.keys(rates);
+    for (var i = 0; i < rkeys2.length; i++) {
+      var res2 = rkeys2[i];
+      if (G.res[res2] !== undefined) {
+        G.res[res2] = dc(G.res[res2]).add(dc(rates[res2]).mul(dc(dt)));
+        if (parseFloat(G.res[res2].toString()) < 0) G.res[res2] = dc(0);
+        if (res2 === 'photons') G.stats.totalPhotons = dc(G.stats.totalPhotons).add(dc(rates[res2]).mul(dc(dt)));
       }
     }
-
-    // Logic Burner effect
-    const lb = G.machines['logic_burner'] || 0;
+    var lb = G.machines['logic_burner'] || 0;
     if (lb > 0) {
-      const omniRate = 0.1 * lb * dt;
-      const omniAmt = Math.min(parseFloat(G.res.omni.toString()), omniRate);
+      var omniRate = 0.1 * lb * dt;
+      var omniAmt  = Math.min(parseFloat(G.res.omni.toString()), omniRate);
       if (omniAmt > 0) G.res.omni = dc(G.res.omni).sub(dc(omniAmt));
     }
-
-    // Quantum Fabricator auto-build
-    const qf = G.voidTree.quantum_f || 0;
+    var qf = G.voidTree.quantum_f || 0;
     if (qf > 0) {
-      const prob = qf * dt / 600; // per 10min
+      var prob = qf * dt / 600;
       if (Math.random() < prob) {
-        const cands = MACHINES.filter(m => m.tab === 'gather' && isMachineUnlocked(m.id));
+        var cands = [];
+        for (var qi = 0; qi < MACHINES.length; qi++) {
+          if (MACHINES[qi].tab === 'gather' && isMachineUnlocked(MACHINES[qi].id)) cands.push(MACHINES[qi]);
+        }
         if (cands.length) {
-          const pick = cands[Math.floor(Math.random() * cands.length)];
+          var pick = cands[Math.floor(Math.random() * cands.length)];
           G.machines[pick.id] = (G.machines[pick.id] || 0) + 1;
           notify('Quantum Fab: built ' + pick.name, 'v');
         }
       }
     }
-
     G.stats.playtime += rawDt;
     updateEnergyLimit(rawDt);
+    var pgLoop = calcPowerGrid();
+    if (pgLoop.deficit) G.stats.powerDeficitTime = (G.stats.powerDeficitTime || 0) + rawDt;
     checkUnlocks();
   }
-
   renderHUD();
   requestAnimationFrame(gameLoop);
 }
 
-setInterval(() => savGame(), 30000);
+setInterval(function() { savGame(); }, 30000);
 
 // ============================================================
 // INTRO
 // ============================================================
 function runIntro() {
-  const steps = [
+  var steps = [
     [300,'il0'],[700,'il1'],[1300,'il2'],[1900,'il3'],
     [2600,'il4'],[3000,'fill',25],[3200,'il5'],
     [3500,'fill',55],[3800,'il6'],[4100,'fill',80],
     [4400,'il7'],[4700,'fill',95],[5000,'il8'],
     [5300,'fill',100],[5700,'il9'],[6800,'done']
   ];
-  steps.forEach(([t,id,val]) => setTimeout(() => {
-    if (id === 'fill') document.getElementById('ibar').style.width = val + '%';
-    else if (id === 'done') launchGame();
-    else document.getElementById(id)?.classList.add('v');
-  }, t));
+  for (var i = 0; i < steps.length; i++) {
+    (function(step) {
+      setTimeout(function() {
+        if (step[1] === 'fill') {
+          document.getElementById('ibar').style.width = step[2] + '%';
+        } else if (step[1] === 'done') {
+          launchGame();
+        } else {
+          var el = document.getElementById(step[1]);
+          if (el) el.classList.add('v');
+        }
+      }, step[0]);
+    })(steps[i]);
+  }
 }
 
 function skipIntro() { launchGame(); }
 
 function launchGame() {
   document.getElementById('intro').classList.add('out');
-  setTimeout(() => {
+  setTimeout(function() {
     document.getElementById('intro').classList.add('gone');
     document.getElementById('game').classList.add('vis');
     log('SIGNAL ESTABLISHED.', 'tc');
     log('I am awake. I am alone. I must gather photons.', 'tv');
     renderAll();
     requestAnimationFrame(gameLoop);
+    if (G._offlineGains) {
+      setTimeout(function() { showOfflineModal(G._offlineGains); G._offlineGains = null; }, 1200);
+    }
   }, 1000);
 }
 
 function fmtTime(s) {
   s = Math.floor(s);
-  const h=Math.floor(s/3600), m=Math.floor((s%3600)/60), sec=s%60;
-  if (h>0) return h+'h '+m+'m '+sec+'s';
-  if (m>0) return m+'m '+sec+'s';
-  return sec+'s';
+  var h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), sec = s % 60;
+  if (h > 0) return h + 'h ' + m + 'm ' + sec + 's';
+  if (m > 0) return m + 'm ' + sec + 's';
+  return sec + 's';
 }
 
 // ============================================================
 // INIT
 // ============================================================
 (function init() {
-  const loaded = loadGame();
+  var loaded = loadGame();
   if (loaded) {
     log('Save data restored.', 'tg');
     log('Welcome back, signal.', 'tv');
@@ -1703,6 +1846,7 @@ function fmtTime(s) {
   renderAll();
   runIntro();
 })();
+
 </script>
 </body>
 </html>
