@@ -19,7 +19,7 @@
 <style>
 
 *{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;background:#03020a;color:#9ca3c0;font-family:'Share Tech Mono',monospace;font-size:12px}
+html,body{height:100%;background:#03020a;color:#b8c2d8;font-family:'Share Tech Mono',monospace;font-size:13px}
 /* starfield */
 body::before{content:'';position:fixed;top:0;right:0;bottom:0;left:0;
   background-image:
@@ -104,10 +104,10 @@ body::after{content:'';position:fixed;top:0;right:0;bottom:0;left:0;background:r
 .res-bar::-webkit-scrollbar{display:none}
 .ri{display:flex;flex-direction:column;align-items:center;min-width:60px;opacity:.18;transition:opacity .4s}
 .ri.on{opacity:1}
-.ri-ico{font-size:11px}
-.ri-lbl{font-size:6px;color:#3d3d5c;letter-spacing:.1em}
-.ri-val{font-size:9px;color:#00e5ff}
-.ri-rps{font-size:7px;color:#00e676}
+.ri-ico{font-size:13px}
+.ri-lbl{font-size:7px;color:#4a4a6a;letter-spacing:.1em}
+.ri-val{font-size:11px;color:#00e5ff}
+.ri-rps{font-size:8px;color:#00e676}
 .hdr-acts{display:flex;align-items:center;flex-shrink:0}
 .hbtn{background:#0c0b1a;border:1px solid #1e1c3a;color:#3d3d5c;font-family:'Share Tech Mono',monospace;font-size:8px;padding:4px 9px;cursor:pointer;letter-spacing:.06em;transition:border-color .15s,color .15s,background .15s}
 .hbtn:hover{border-color:#00e5ff;color:#00e5ff}
@@ -124,8 +124,8 @@ body::after{content:'';position:fixed;top:0;right:0;bottom:0;left:0;background:r
 .sb-sect:first-child{border-top:none;margin-top:0}
 .tab-btn{background:none;border:none;border-left:3px solid transparent;color:#3d3d5c;font-family:'Orbitron',monospace;font-size:7px;letter-spacing:.08em;padding:8px 10px;cursor:pointer;text-align:left;transition:border-color .15s,color .15s,background .15s;display:flex;align-items:center;width:100%}
 .tab-btn:hover:not(:disabled){color:#9ca3c0;background:rgba(0,229,255,.03);border-left-color:#2d2a52}
-.tab-btn.active{border-left-color:#00e5ff;color:#00e5ff;background:rgba(0,229,255,.06)}
-.tab-btn.void-tab.active{border-left-color:#6600ff;color:#9f60ff;background:rgba(102,0,255,.15)}
+.tab-btn.active{border-left-color:#00e5ff;color:#00e5ff;background:rgba(0,229,255,.10);box-shadow:inset 3px 0 12px rgba(0,229,255,.08)}
+.tab-btn.void-tab.active{border-left-color:#6600ff;color:#9f60ff;background:rgba(102,0,255,.18);box-shadow:inset 3px 0 12px rgba(102,0,255,.12)}
 .tab-btn:disabled{opacity:.18;cursor:not-allowed}
 .tab-ico{font-size:11px}
 .tab-dot{width:4px;height:4px;border-radius:50%;background:#ffa500;box-shadow:0 0 5px #ffa500;margin-left:auto;display:none;animation:pulse 1.4s infinite}
@@ -168,11 +168,11 @@ body::after{content:'';position:fixed;top:0;right:0;bottom:0;left:0;background:r
 .mcard.mvoid{border-color:rgba(124,58,237,.25)}
 .mcard.mvoid::before{background:#7c3aed}
 .mc-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
-.mc-name{font-family:'Orbitron',monospace;font-size:8px;color:#ccd6f6;font-weight:700}
-.mc-cnt{background:#1e1c3a;padding:1px 7px;font-size:11px;color:#00e5ff;min-width:28px;text-align:center}
-.mc-desc{font-size:7px;color:#3d3d5c;line-height:1.5;margin-bottom:3px}
-.mc-prod{font-size:7px;color:#00e676;margin-bottom:2px}
-.mc-cost{font-size:7px;color:#ffa500}
+.mc-name{font-family:'Orbitron',monospace;font-size:9px;color:#dde6ff;font-weight:700}
+.mc-cnt{background:#1e1c3a;padding:1px 7px;font-size:12px;color:#00e5ff;min-width:28px;text-align:center}
+.mc-desc{font-size:8px;color:#4a4a6a;line-height:1.5;margin-bottom:3px}
+.mc-prod{font-size:8px;color:#00e676;margin-bottom:2px}
+.mc-cost{font-size:8px;color:#ffa500}
 .mc-lock{font-size:7px;color:#3d3d5c;font-style:italic;margin-top:2px}
 .mc-special{font-size:7px;color:#7c3aed;margin-top:2px}
 .mc-can-tag{position:absolute;top:2px;right:6px;font-size:6px;color:#00e676;letter-spacing:.08em}
@@ -224,8 +224,8 @@ body::after{content:'';position:fixed;top:0;right:0;bottom:0;left:0;background:r
 .cx-stat{font-size:7px}.cx-sl{color:#3d3d5c}.cx-sv{color:#00e5ff}
 
 /* STATS */
-.srow{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #1e1c3a;font-size:10px}
-.sl{color:#3d3d5c}.sv{color:#00e5ff}
+.srow{display:flex;justify-content:space-between;padding:4px 0;border-bottom:1px solid #1e1c3a;font-size:11px}
+.sl{color:#4a4a6a}.sv{color:#00e5ff}
 
 /* DYSON RING */
 .ring-wrap{width:160px;height:160px;margin:0 auto 12px;position:relative}
@@ -254,6 +254,52 @@ body::after{content:'';position:fixed;top:0;right:0;bottom:0;left:0;background:r
 .hidden{display:none!important}
 .tc{color:#00e5ff}.ta{color:#ffa500}.tv{color:#7c3aed}.tg{color:#00e676}.tr{color:#ff1744}.tb{color:#6600ff}
 .rp-sect-title{font-family:'Orbitron',monospace;font-size:7px;color:#3d3d5c;letter-spacing:.2em;margin-bottom:8px;text-transform:uppercase}
+/* PLAYER IDENTITY */
+#player-identity{font-size:9px;color:#3d8a60;letter-spacing:.12em;padding:3px 10px;border:1px solid #1a3a28;background:rgba(0,100,60,.06);white-space:nowrap;cursor:pointer;transition:border-color .2s,color .2s}
+#player-identity:hover{border-color:#00e676;color:#00e676}
+
+/* DEBUG CONSOLE */
+.debug-mode-hidden{display:none!important}
+.debug-panel{background:#0a0015;border:1px solid #ff00ff;padding:14px;margin-bottom:10px;position:relative}
+.debug-panel::before{content:'[VOID PROTOCOL ACTIVE]';position:absolute;top:-1px;left:12px;font-size:8px;color:#ff00ff;letter-spacing:.2em;background:#0a0015;padding:0 6px}
+.debug-panel select,.debug-panel input{background:#110f22;border:1px solid #ff00ff;color:#ff88ff;font-family:'Share Tech Mono',monospace;font-size:12px;padding:5px 8px;margin:4px 2px 4px 0;outline:none}
+.debug-btn{background:rgba(255,0,255,.12);border:1px solid #ff00ff;color:#ff88ff;font-family:'Orbitron',monospace;font-size:8px;letter-spacing:.15em;padding:6px 16px;cursor:pointer;transition:background .2s}
+.debug-btn:hover{background:rgba(255,0,255,.28)}
+.debug-row{display:flex;align-items:center;flex-wrap:wrap;gap:6px;margin-bottom:8px}
+.debug-lbl{font-size:9px;color:#7a4a7a;letter-spacing:.12em;min-width:70px}
+
+/* ASCENSION SKILL TREE */
+.asc-tree{display:flex;flex-direction:column;gap:0}
+.asc-branch{display:flex;flex-direction:column;margin-bottom:4px}
+.asc-connector{width:2px;height:16px;background:linear-gradient(180deg,#6600ff,#2d1a4a);margin-left:24px}
+.asc-node{background:#100820;border:1px solid rgba(102,0,255,.3);padding:12px 14px;cursor:pointer;display:flex;align-items:center;gap:12px;transition:border-color .15s,background .15s,box-shadow .15s;position:relative}
+.asc-node:hover:not(.asc-locked):not(.asc-maxed){border-color:#6600ff;background:#160b2a;box-shadow:0 0 16px rgba(102,0,255,.15)}
+.asc-node.asc-locked{opacity:.3;cursor:not-allowed;border-color:rgba(102,0,255,.12)}
+.asc-node.asc-maxed{border-color:rgba(0,229,255,.35);background:rgba(0,229,255,.04)}
+.asc-node.asc-can{border-color:#9f60ff;box-shadow:0 0 12px rgba(102,0,255,.2)}
+.asc-ico{font-size:22px;flex-shrink:0}
+.asc-info{flex:1}
+.asc-name{font-family:'Orbitron',monospace;font-size:9px;color:#cc99ff;margin-bottom:3px;font-weight:700}
+.asc-node.asc-maxed .asc-name{color:#00e5ff}
+.asc-desc{font-size:8px;color:#5a4a7a;line-height:1.5;margin-bottom:3px}
+.asc-cost{font-size:8px;color:#9f60ff}
+.asc-node.asc-maxed .asc-cost{color:#00e5ff}
+.asc-lvl{font-family:'Orbitron',monospace;font-size:20px;color:#6600ff;text-shadow:0 0 12px rgba(102,0,255,.5);min-width:36px;text-align:center}
+.asc-node.asc-maxed .asc-lvl{color:#00e5ff;text-shadow:0 0 12px rgba(0,229,255,.5)}
+.asc-bar{height:3px;background:#1e1c3a;margin-top:4px;border-radius:2px;overflow:hidden}
+.asc-bar-fill{height:100%;background:linear-gradient(90deg,#6600ff,#cc44ff);transition:width .4s;border-radius:2px}
+
+/* NAME MODAL */
+#name-modal{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.88);z-index:900;display:none;flex-direction:column;align-items:center;justify-content:center}
+#name-modal.show{display:flex}
+.name-box{background:#0c0b1a;border:1px solid #00e676;padding:24px;max-width:340px;width:90%;position:relative}
+.name-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#00e676,transparent)}
+.name-title{font-family:'Orbitron',monospace;font-size:10px;color:#00e676;letter-spacing:.18em;margin-bottom:14px}
+.name-input{width:100%;background:#110f22;border:1px solid #00e676;color:#00e676;font-family:'Share Tech Mono',monospace;font-size:16px;padding:8px 10px;outline:none;letter-spacing:.08em;margin-bottom:12px}
+.name-input:focus{box-shadow:0 0 10px rgba(0,230,118,.2)}
+.name-btns{display:flex;gap:8px}
+.name-btn{flex:1;background:none;border:1px solid #00e676;color:#00e676;font-family:'Orbitron',monospace;font-size:8px;letter-spacing:.12em;padding:8px;cursor:pointer;transition:background .15s}
+.name-btn:hover{background:rgba(0,230,118,.12)}
 @media(max-width:900px){#rp{display:none}}
 @media(max-width:640px){#sb{width:40px;min-width:40px}.tab-btn .tab-lbl{display:none}.sb-sect{display:none}.tab-btn{padding:8px;justify-content:center}}
 </style>
@@ -328,6 +374,7 @@ body::after{content:'';position:fixed;top:0;right:0;bottom:0;left:0;background:r
   <!-- HEADER -->
   <div id="hdr">
     <div class="logo">THE LAST SIGNAL: <em>DYSON CORE</em></div>
+    <div id="player-identity" onclick="showNameModal()" title="Click to change System Identity">SYS: CORE-01</div>
     <div class="phase-badge" id="phase-badge">PHASE I: THE REBOOT</div>
     <div class="res-bar" id="res-bar">
       <div class="ri on" id="ri-photons"><div class="ri-ico">&#x26A1;</div><div class="ri-lbl">PHOTONS</div><div class="ri-val" id="rv-photons">0</div><div class="ri-rps" id="rr-photons"></div></div>
@@ -380,6 +427,8 @@ body::after{content:'';position:fixed;top:0;right:0;bottom:0;left:0;background:r
       <button class="tab-btn void-tab" disabled id="tb-void" onclick="showTab('void')"><span class="tab-ico">&#x2B21;</span><span class="tab-lbl">THE VOID</span></button>
       <button class="tab-btn" id="tb-codex"    onclick="showTab('codex')"><span class="tab-ico">&#x1F4D6;</span><span class="tab-lbl">CODEX</span></button>
       <button class="tab-btn" id="tb-stats"    onclick="showTab('stats')"><span class="tab-ico">&#x1F4CA;</span><span class="tab-lbl">STATS</span></button>
+      <button class="tab-btn" id="tb-ascension" style="display:none" onclick="showTab('ascension')"><span class="tab-ico">&#x2736;</span><span class="tab-lbl">LATTICE</span></button>
+      <button class="tab-btn debug-mode-hidden" id="tb-debug" onclick="showTab('debug')"><span class="tab-ico">&#x26A0;</span><span class="tab-lbl" style="color:#ff00ff">[DEBUG]</span></button>
     </div>
 
     <!-- CONTENT AREA -->
@@ -491,6 +540,68 @@ body::after{content:'';position:fixed;top:0;right:0;bottom:0;left:0;background:r
         </div>
       </div>
 
+      <!-- ASCENSION SKILL TREE (Void Lattice) -->
+      <div id="tab-ascension" class="hidden">
+        <div class="pnl void-pnl">
+          <div class="pnl-t void">THE VOID LATTICE — ASCENSION SKILL TREE</div>
+          <div class="vc-box" style="margin-bottom:12px"><div class="vc-val" id="asc-vc-display">0</div><div class="vc-lbl">VOID CHIPS AVAILABLE</div></div>
+          <div style="font-size:9px;color:#5a4a7a;margin-bottom:14px;line-height:1.7">The Lattice exists beyond ordinary void logic. Skills here are permanent across all resets — earned through your bargain with the Black Matter Man. Each node must be unlocked in sequence.</div>
+          <div class="asc-tree" id="asc-tree"></div>
+        </div>
+      </div>
+
+      <!-- DEBUG CONSOLE -->
+      <div id="tab-debug" class="hidden">
+        <div class="debug-panel">
+          <div style="font-family:'Orbitron',monospace;font-size:10px;color:#ff00ff;letter-spacing:.15em;margin-bottom:14px;text-shadow:0 0 20px #ff00ff">VOID PROTOCOL — DEV OVERRIDE</div>
+          <div style="font-size:9px;color:#7a4a7a;margin-bottom:14px">System identity: <span style="color:#ff88ff" id="debug-identity">void</span> — Unrestricted access granted.</div>
+          <div class="debug-row">
+            <span class="debug-lbl">RESOURCE:</span>
+            <select id="debug-res">
+              <option value="photons">⚡ Photons</option>
+              <option value="power">🔋 Power (W)</option>
+              <option value="metal">🪙 Metal Shards</option>
+              <option value="regolith">🌋 Regolith</option>
+              <option value="copper">🔶 Copper</option>
+              <option value="silicon">💠 Silicon</option>
+              <option value="alloy">⚙️ Alloy Sheets</option>
+              <option value="gas">💨 Trace Gases</option>
+              <option value="plasma">☀️ Solar Plasma</option>
+              <option value="mH">🔫 Metallic Hydrogen</option>
+              <option value="qgp">☢️ Quark-Gluon Plasma</option>
+              <option value="neutron">⭐ Neutronium</option>
+              <option value="dark">🌑 Dark Matter</option>
+              <option value="gravit">💫 Gravitons</option>
+              <option value="omni">🌈 Omni-Fuel</option>
+              <option value="voidChips">⬡ Void Chips</option>
+            </select>
+          </div>
+          <div class="debug-row">
+            <span class="debug-lbl">AMOUNT:</span>
+            <input type="number" id="debug-amount" value="1000" min="0" style="width:160px">
+          </div>
+          <div class="debug-row">
+            <button class="debug-btn" onclick="debugGrant()">⬡ GRANT RESOURCE</button>
+            <button class="debug-btn" onclick="debugMaxAll()" style="margin-left:6px">⚡ MAX ALL RESOURCES</button>
+          </div>
+          <div style="margin-top:12px;border-top:1px solid rgba(255,0,255,.2);padding-top:12px">
+            <div class="debug-row">
+              <span class="debug-lbl">PRESTIGE:</span>
+              <button class="debug-btn" onclick="debugTriggerBMM()">👁 SUMMON BLACK MATTER MAN</button>
+            </div>
+            <div class="debug-row">
+              <span class="debug-lbl">UNLOCK:</span>
+              <button class="debug-btn" onclick="debugUnlockAll()">🔓 UNLOCK ALL TABS</button>
+            </div>
+            <div class="debug-row">
+              <span class="debug-lbl">ASCENSION:</span>
+              <button class="debug-btn" onclick="debugUnlockAscension()">🌀 FORCE UNLOCK LATTICE</button>
+            </div>
+          </div>
+          <div style="margin-top:12px;font-size:8px;color:#3d1a3d;border-top:1px solid rgba(255,0,255,.1);padding-top:8px">[ VOID PROTOCOL v0.0 — FOR DEVELOPMENT USE ONLY ]</div>
+        </div>
+      </div>
+
     </div><!-- /content -->
 
     <!-- RIGHT PANEL -->
@@ -522,6 +633,19 @@ body::after{content:'';position:fixed;top:0;right:0;bottom:0;left:0;background:r
     </div><!-- /rp -->
   </div><!-- /body -->
 </div><!-- /game -->
+
+<!-- NAME MODAL -->
+<div id="name-modal">
+  <div class="name-box">
+    <div class="name-title">SYSTEM IDENTITY CONFIGURATION</div>
+    <div style="font-size:9px;color:#3d5c3d;margin-bottom:10px">Enter a system identity designation. Type "void" to access developer protocols.</div>
+    <input type="text" class="name-input" id="name-input" maxlength="32" placeholder="CORE-01" autocomplete="off">
+    <div class="name-btns">
+      <button class="name-btn" onclick="savePlayerName()">[ CONFIRM ]</button>
+      <button class="name-btn" onclick="closeNameModal()" style="border-color:#1e1c3a;color:#3d3d5c">[ CANCEL ]</button>
+    </div>
+  </div>
+</div>
 
 <script>
 // ES5 + rAF Polyfills
@@ -654,6 +778,7 @@ var G = {
   machines:{}, research:{},
   voidChips:dc(0), totalVoidChips:dc(0),
   voidTree:{},
+  ascensionTree:{},
   prestigeUpgrades:{bionic:0,overclock:0,efficient:0,voidSight:0,memoryCore:0,warpSpeed:0},
   stats:{
     totalPhotons:dc(0),totalClicks:0,totalMachines:0,
@@ -663,8 +788,10 @@ var G = {
   flags:{
     baseUnlocked:false,stellarUnlocked:false,dysonUnlocked:false,
     voidUnlocked:false,endingReached:false,bmmMet:false,
+    ascensionUnlocked:false,
     codexDiscovered:{}
   },
+  playerName: 'CORE-01',
   lastSaveTime: Date.now(),
   version: 3
 };
@@ -789,6 +916,18 @@ var PRESTIGE_UPS = [
 ];
 
 // ============================================================
+// ASCENSION SKILL TREE (The Void Lattice)
+// Unlocked after first Void Reset. Currency: Void Chips.
+// ============================================================
+var ASCENSION_TREE = [
+  {id:'photonic_eff',  name:'Photonic Efficiency', ico:'⚡', desc:'+20% Photon gain per level. The lattice remembers what you once were.',              costBase:5,  maxLvl:5, req:null,           eff:'photon_boost'},
+  {id:'matter_comp',   name:'Matter Compression',  ico:'⚙️', desc:'Reduces Alloy cost for machines by 10% per level. Fold matter tighter.',            costBase:8,  maxLvl:5, req:'photonic_eff',  eff:'alloy_cost_reduce'},
+  {id:'signal_str',    name:'Signal Strength',     ico:'📡', desc:'+15% chance per level for random space events and buffs. The void listens.',         costBase:10, maxLvl:5, req:'matter_comp',   eff:'event_boost'},
+  {id:'void_resonance',name:'Void Resonance',      ico:'🌀', desc:'+10% Void Chip gain per level. The Black Matter Man is pleased.',                   costBase:15, maxLvl:5, req:'signal_str',    eff:'chip_resonance'},
+  {id:'lattice_core',  name:'Lattice Core',        ico:'💜', desc:'All ascension effects amplified by 25% per level. The lattice awakens fully.',      costBase:25, maxLvl:3, req:'void_resonance', eff:'asc_amplify'}
+];
+
+// ============================================================
 // ENDINGS
 // ============================================================
 var ENDINGS = {
@@ -846,6 +985,10 @@ function calcMults() {
   }
   var tempCnt2 = G.machines['temp_stab'] || 0;
   if (tempCnt2 > 0) M.global *= Math.pow(1.15, tempCnt2);
+  // Ascension Lattice bonuses
+  var ascAmp = 1 + (G.ascensionTree ? (G.ascensionTree['lattice_core'] || 0) : 0) * 0.25;
+  var photEff = (G.ascensionTree ? (G.ascensionTree['photonic_eff'] || 0) : 0);
+  if (photEff > 0) M.photons *= (1 + photEff * 0.20 * ascAmp);
   return M;
 }
 
@@ -859,11 +1002,15 @@ function machineCost(mach, n) {
   var rate = calcCostRate() - (G.prestigeUpgrades.efficient * 0.005);
   var costs = {};
   var costKeys = Object.keys(mach.cost);
+  var ascAmp = 1 + (G.ascensionTree ? (G.ascensionTree['lattice_core'] || 0) : 0) * 0.25;
+  var matComp = (G.ascensionTree ? (G.ascensionTree['matter_comp'] || 0) : 0);
+  var alloyDiscount = 1 - Math.min(0.5, matComp * 0.10 * ascAmp);
   for (var i = 0; i < costKeys.length; i++) {
     var res = costKeys[i];
     var base = mach.cost[res];
     var c = 0;
     for (var j = 0; j < n; j++) c += base * Math.pow(rate, cnt + j);
+    if (res === 'alloy') c *= alloyDiscount;
     costs[res] = dc(c);
   }
   return costs;
@@ -1053,7 +1200,11 @@ function calcVoidChips() {
     + G.stats.dysonPct * 200
   ));
   var boost = Math.pow(1.25, G.voidTree.void_acc || 0);
-  return dc(Math.floor(base * boost));
+  // Ascension: Void Resonance adds +10% per level, amplified by Lattice Core
+  var ascAmp = 1 + (G.ascensionTree ? (G.ascensionTree['lattice_core'] || 0) : 0) * 0.25;
+  var resonance = (G.ascensionTree ? (G.ascensionTree['void_resonance'] || 0) : 0);
+  var resBoost = 1 + resonance * 0.10 * ascAmp;
+  return dc(Math.floor(base * boost * resBoost));
 }
 
 function showBMM() {
@@ -1080,7 +1231,7 @@ function doVoidReset() {
   var mc = G.prestigeUpgrades.memoryCore || 0;
   if (mc > 0) G.res.photons = dc(100 * mc);
   G.machines = {}; G.research = {};
-  G.flags = Object.assign({}, G.flags, {baseUnlocked:false,stellarUnlocked:false,dysonUnlocked:false,voidUnlocked:false,endingReached:false,codexDiscovered:G.flags.codexDiscovered||{}});
+  G.flags = Object.assign({}, G.flags, {baseUnlocked:false,stellarUnlocked:false,dysonUnlocked:false,voidUnlocked:false,endingReached:false,codexDiscovered:G.flags.codexDiscovered||{},ascensionUnlocked:G.flags.ascensionUnlocked||false});
   G.stats.playtime = 0; G.stats.phase = 1; G.stats.dysonPct = 0; G.stats.energyLimitPct = 0;
   var tabsToLock = ['base','stellar','dyson','void'];
   for (var i = 0; i < tabsToLock.length; i++) {
@@ -1093,6 +1244,14 @@ function doVoidReset() {
   showTab('gather');
   notify('VOID RESET — +' + fmt(chips) + ' Void Chips', 'b');
   log('Universe reset. Void Chips gained: ' + fmt(chips), 'tb');
+  // Unlock Ascension after first prestige
+  if (!G.flags.ascensionUnlocked) {
+    G.flags.ascensionUnlocked = true;
+    var ascBtn = document.getElementById('tb-ascension');
+    if (ascBtn) ascBtn.style.display = '';
+    notify('THE VOID LATTICE — Ascension Skill Tree unlocked!', 'b');
+    log('VOID LATTICE: The Black Matter Man opens the Lattice.', 'tb');
+  }
   renderAll(); savGame();
 }
 
@@ -1532,6 +1691,7 @@ function renderStats() {
   var ssup = pg.supply >= 1000 ? (pg.supply / 1000).toFixed(2) + 'kW' : pg.supply.toFixed(1) + 'W';
   var sdem = pg.demand >= 1000 ? (pg.demand / 1000).toFixed(2) + 'kW' : pg.demand.toFixed(1) + 'W';
   var sh = '';
+  sh += '<div class="srow"><span class="sl">System Identity</span><span class="sv" style="color:#00e676">' + (G.playerName || 'CORE-01') + '</span></div>';
   sh += '<div class="srow"><span class="sl">Phase</span><span class="sv">' + G.stats.phase + '</span></div>';
   sh += '<div class="srow"><span class="sl">Total Clicks</span><span class="sv">' + G.stats.totalClicks.toLocaleString() + '</span></div>';
   sh += '<div class="srow"><span class="sl">Total Photons</span><span class="sv">' + fmt(G.stats.totalPhotons) + '</span></div>';
@@ -1554,12 +1714,14 @@ function renderStats() {
 
 function renderAll() {
   renderMachines(); renderResearch(); renderVoidTab(); renderCodex(); renderStats(); renderHUD(); updatePhase();
+  renderAscensionTab();
+  updateIdentityDisplay();
 }
 
 // ============================================================
 // TABS
 // ============================================================
-var ALL_TABS = ['gather','base','stellar','dyson','research','void','codex','stats'];
+var ALL_TABS = ['gather','base','stellar','dyson','research','void','codex','stats','ascension','debug'];
 function showTab(tab) {
   for (var i = 0; i < ALL_TABS.length; i++) {
     var t = ALL_TABS[i];
@@ -1568,10 +1730,11 @@ function showTab(tab) {
     if (tabEl) { if (t !== tab) tabEl.classList.add('hidden'); else tabEl.classList.remove('hidden'); }
     if (tbEl)  { if (t === tab) tbEl.classList.add('active'); else tbEl.classList.remove('active'); }
   }
-  if (tab === 'research') renderResearch();
-  if (tab === 'void')     renderVoidTab();
-  if (tab === 'codex')    renderCodex();
-  if (tab === 'stats')    renderStats();
+  if (tab === 'research')   renderResearch();
+  if (tab === 'void')       renderVoidTab();
+  if (tab === 'codex')      renderCodex();
+  if (tab === 'stats')      renderStats();
+  if (tab === 'ascension')  renderAscensionTab();
   var dot = document.getElementById('td-' + tab);
   if (dot) dot.classList.remove('show');
 }
@@ -1685,13 +1848,19 @@ function loadGame() {
     if (data.voidChips  !== undefined) G.voidChips      = dc(data.voidChips);
     if (data.totalVoidChips !== undefined) G.totalVoidChips = dc(data.totalVoidChips);
     if (data.voidTree)         G.voidTree        = data.voidTree;
+    if (data.ascensionTree)    G.ascensionTree   = data.ascensionTree;
     if (data.prestigeUpgrades) G.prestigeUpgrades= Object.assign({}, G.prestigeUpgrades, data.prestigeUpgrades);
     if (data.stats)            G.stats           = Object.assign({}, G.stats, data.stats);
     if (data.flags)            G.flags           = Object.assign({}, G.flags, data.flags);
+    if (data.playerName)       G.playerName      = data.playerName;
     if (G.flags.baseUnlocked)    unlockTab('base');
     if (G.flags.stellarUnlocked) unlockTab('stellar');
     if (G.flags.dysonUnlocked)   unlockTab('dyson');
     if (G.flags.voidUnlocked)    unlockTab('void');
+    if (G.flags.ascensionUnlocked) {
+      var ascBtn = document.getElementById('tb-ascension');
+      if (ascBtn) ascBtn.style.display = '';
+    }
     updatePhase();
     var savedAt    = data.lastSaveTime || Date.now();
     var offlineSec = Math.min((Date.now() - savedAt) / 1000, MAX_OFFLINE_SEC);
@@ -1725,6 +1894,190 @@ function importSave() {
     localStorage.setItem('tls_dyson_v3', btoa(unescape(encodeURIComponent(raw))));
     location.reload();
   } catch(e) { notify('Invalid save data.', 'r'); }
+}
+
+// ============================================================
+// PLAYER IDENTITY SYSTEM
+// ============================================================
+function updateIdentityDisplay() {
+  var el = document.getElementById('player-identity');
+  if (el) el.textContent = 'SYS: ' + (G.playerName || 'CORE-01');
+  var debugIdentEl = document.getElementById('debug-identity');
+  if (debugIdentEl) debugIdentEl.textContent = G.playerName || 'CORE-01';
+  checkDebugMode();
+}
+
+function checkDebugMode() {
+  var isVoid = isDebugMode();
+  var dbBtn = document.getElementById('tb-debug');
+  if (dbBtn) {
+    if (isVoid) {
+      dbBtn.classList.remove('debug-mode-hidden');
+      dbBtn.style.borderLeftColor = '#ff00ff';
+    } else {
+      dbBtn.classList.add('debug-mode-hidden');
+      dbBtn.style.borderLeftColor = '';
+    }
+  }
+}
+
+function showNameModal() {
+  var modal = document.getElementById('name-modal');
+  var inp   = document.getElementById('name-input');
+  if (inp) inp.value = G.playerName || 'CORE-01';
+  if (modal) modal.classList.add('show');
+  setTimeout(function() { if (inp) inp.focus(); }, 100);
+}
+
+function closeNameModal() {
+  var modal = document.getElementById('name-modal');
+  if (modal) modal.classList.remove('show');
+}
+
+function savePlayerName() {
+  var inp = document.getElementById('name-input');
+  var val = (inp ? inp.value.trim() : '') || 'CORE-01';
+  G.playerName = val;
+  updateIdentityDisplay();
+  closeNameModal();
+  if (isDebugMode()) {
+    notify('[VOID PROTOCOL] Developer access granted.', 'b');
+    log('VOID PROTOCOL activated by System Identity override.', 'tb');
+  } else {
+    notify('System identity: ' + val, 'g');
+  }
+  savGame();
+}
+
+// ============================================================
+// DEBUG CONSOLE (Void Protocol)
+// ============================================================
+function isDebugMode() {
+  return (G.playerName || '').trim().toLowerCase() === 'void';
+}
+
+function debugGrant() {
+  if (!isDebugMode()) return;
+  var resKey = document.getElementById('debug-res').value;
+  var amt    = parseFloat(document.getElementById('debug-amount').value) || 0;
+  if (resKey === 'voidChips') {
+    G.voidChips = dc(G.voidChips).add(dc(amt));
+  } else if (G.res[resKey] !== undefined) {
+    G.res[resKey] = dc(G.res[resKey]).add(dc(amt));
+    discoverResource(resKey);
+  }
+  renderAll();
+  notify('[DEBUG] Granted ' + amt + ' ' + resKey, 'b');
+}
+
+function debugMaxAll() {
+  if (!isDebugMode()) return;
+  var keys = Object.keys(G.res);
+  for (var i = 0; i < keys.length; i++) {
+    G.res[keys[i]] = dc(1e15);
+    discoverResource(keys[i]);
+  }
+  G.voidChips = dc(G.voidChips).add(dc(9999));
+  renderAll();
+  notify('[DEBUG] All resources maxed.', 'b');
+}
+
+function debugTriggerBMM() {
+  if (!isDebugMode()) return;
+  showBMM();
+}
+
+function debugUnlockAll() {
+  if (!isDebugMode()) return;
+  var tabs = ['base','stellar','dyson','void'];
+  for (var i = 0; i < tabs.length; i++) {
+    G.flags[tabs[i] + 'Unlocked'] = true;
+    unlockTab(tabs[i]);
+  }
+  G.stats.phase = 5;
+  updatePhase();
+  renderAll();
+  notify('[DEBUG] All tabs unlocked.', 'b');
+}
+
+function debugUnlockAscension() {
+  if (!isDebugMode()) return;
+  G.flags.ascensionUnlocked = true;
+  G.flags.bmmMet = true;
+  var ascBtn = document.getElementById('tb-ascension');
+  if (ascBtn) ascBtn.style.display = '';
+  renderAscensionTab();
+  notify('[DEBUG] Void Lattice force-unlocked.', 'b');
+}
+
+// ============================================================
+// ASCENSION SKILL TREE (The Void Lattice)
+// ============================================================
+function isAscNodeUnlocked(node) {
+  if (!node.req) return true;
+  var reqLvl = G.ascensionTree[node.req] || 0;
+  // Previous node must be at level >= 1
+  return reqLvl >= 1;
+}
+
+function buyAscensionNode(id) {
+  var node = null;
+  for (var i = 0; i < ASCENSION_TREE.length; i++) {
+    if (ASCENSION_TREE[i].id === id) { node = ASCENSION_TREE[i]; break; }
+  }
+  if (!node) return;
+  if (!isAscNodeUnlocked(node)) { notify('Previous node required.', 'r'); return; }
+  var cur = G.ascensionTree[id] || 0;
+  if (cur >= node.maxLvl) { notify('Max level reached!', 'a'); return; }
+  var ampMult = 1 + (G.ascensionTree['lattice_core'] || 0) * 0.25;
+  var cost = dc(node.costBase * Math.pow(2, cur));
+  if (dc(G.voidChips).lt(cost)) { notify('Not enough Void Chips.', 'b'); return; }
+  G.voidChips = dc(G.voidChips).sub(cost);
+  G.ascensionTree[id] = cur + 1;
+  notify(node.name + ' Lv' + (cur + 1) + ' — Lattice empowered.', 'b');
+  log('Void Lattice: ' + node.name + ' upgraded to Lv' + (cur + 1), 'tb');
+  renderAscensionTab();
+  renderVoidTab();
+}
+
+function renderAscensionTab() {
+  var el = document.getElementById('asc-tree');
+  if (!el) return;
+  var vcDisp = document.getElementById('asc-vc-display');
+  if (vcDisp) vcDisp.textContent = fmt(G.voidChips);
+  var html = '';
+  for (var i = 0; i < ASCENSION_TREE.length; i++) {
+    var node   = ASCENSION_TREE[i];
+    var cur    = G.ascensionTree[node.id] || 0;
+    var maxed  = cur >= node.maxLvl;
+    var unlocked = isAscNodeUnlocked(node);
+    var cost   = dc(node.costBase * Math.pow(2, cur));
+    var canBuy = unlocked && !maxed && dc(G.voidChips).gte(cost);
+    var cls    = 'asc-node';
+    if (!unlocked) cls += ' asc-locked';
+    else if (maxed) cls += ' asc-maxed';
+    else if (canBuy) cls += ' asc-can';
+    var onclick = (unlocked && !maxed) ? ('buyAscensionNode(\'' + node.id + '\')') : 'void 0';
+    var pct = (cur / node.maxLvl) * 100;
+    if (i > 0) html += '<div class="asc-connector"></div>';
+    html += '<div class="' + cls + '" onclick="' + onclick + '">';
+    html += '<div class="asc-ico">' + node.ico + '</div>';
+    html += '<div class="asc-info">';
+    html += '<div class="asc-name">' + node.name + '</div>';
+    html += '<div class="asc-desc">' + node.desc + '</div>';
+    if (maxed) {
+      html += '<div class="asc-cost">&#x2713; MAXED</div>';
+    } else if (!unlocked) {
+      html += '<div class="asc-cost" style="color:#3d1a3d">&#x1F512; Requires: ' + (node.req ? node.req.replace(/_/g,' ') : 'START') + '</div>';
+    } else {
+      html += '<div class="asc-cost">&#x2B21; ' + fmt(cost) + ' Void Chips</div>';
+    }
+    html += '<div class="asc-bar"><div class="asc-bar-fill" style="width:' + pct + '%"></div></div>';
+    html += '</div>';
+    html += '<div class="asc-lvl">' + cur + '<div style="font-size:7px;color:rgba(102,0,255,.4)">/' + node.maxLvl + '</div></div>';
+    html += '</div>';
+  }
+  el.innerHTML = html;
 }
 
 // ============================================================
@@ -1765,7 +2118,10 @@ function gameLoop() {
     }
     var qf = G.voidTree.quantum_f || 0;
     if (qf > 0) {
-      var prob = qf * dt / 600;
+      var ascAmpQF = 1 + (G.ascensionTree ? (G.ascensionTree['lattice_core'] || 0) : 0) * 0.25;
+      var sigStr   = (G.ascensionTree ? (G.ascensionTree['signal_str'] || 0) : 0);
+      var eventMult = 1 + sigStr * 0.15 * ascAmpQF;
+      var prob = qf * dt * eventMult / 600;
       if (Math.random() < prob) {
         var cands = [];
         for (var qi = 0; qi < MACHINES.length; qi++) {
@@ -1826,6 +2182,15 @@ function launchGame() {
     document.getElementById('game').classList.add('vis');
     log('SIGNAL ESTABLISHED.', 'tc');
     log('I am awake. I am alone. I must gather photons.', 'tv');
+    // Name input keyboard handling
+    var nameInp = document.getElementById('name-input');
+    if (nameInp && !nameInp._bound) {
+      nameInp._bound = true;
+      nameInp.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.keyCode === 13) savePlayerName();
+        if (e.key === 'Escape' || e.keyCode === 27) closeNameModal();
+      });
+    }
     renderAll();
     requestAnimationFrame(gameLoop);
     if (G._offlineGains) {
