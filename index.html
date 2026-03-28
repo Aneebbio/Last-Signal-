@@ -20,12 +20,12 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;background:#03020a;color:#c8d4e8;font-family:'Share Tech Mono',monospace;font-size:13px}
-body::before{content:'';position:fixed;inset:0;background-image:radial-gradient(1px 1px at 5% 10%,rgba(255,255,255,.3) 0%,transparent 100%),radial-gradient(1px 1px at 20% 40%,rgba(0,229,255,.25) 0%,transparent 100%),radial-gradient(1px 1px at 38% 72%,rgba(255,255,255,.2) 0%,transparent 100%),radial-gradient(1px 1px at 55% 15%,rgba(124,58,237,.3) 0%,transparent 100%),radial-gradient(1px 1px at 70% 60%,rgba(255,255,255,.2) 0%,transparent 100%),radial-gradient(1px 1px at 83% 28%,rgba(0,229,255,.2) 0%,transparent 100%),radial-gradient(1px 1px at 92% 80%,rgba(255,255,255,.25) 0%,transparent 100%),radial-gradient(1px 1px at 45% 90%,rgba(124,58,237,.2) 0%,transparent 100%);background-size:280px 240px,350px 310px,220px 280px,400px 360px,260px 300px,310px 270px,380px 340px,290px 320px;pointer-events:none;z-index:0;animation:starDrift 120s linear infinite}
+body::before{content:'';position:fixed;top:0;right:0;bottom:0;left:0;background-image:radial-gradient(1px 1px at 5% 10%,rgba(255,255,255,.3) 0%,transparent 100%),radial-gradient(1px 1px at 20% 40%,rgba(0,229,255,.25) 0%,transparent 100%),radial-gradient(1px 1px at 38% 72%,rgba(255,255,255,.2) 0%,transparent 100%),radial-gradient(1px 1px at 55% 15%,rgba(124,58,237,.3) 0%,transparent 100%),radial-gradient(1px 1px at 70% 60%,rgba(255,255,255,.2) 0%,transparent 100%),radial-gradient(1px 1px at 83% 28%,rgba(0,229,255,.2) 0%,transparent 100%),radial-gradient(1px 1px at 92% 80%,rgba(255,255,255,.25) 0%,transparent 100%),radial-gradient(1px 1px at 45% 90%,rgba(124,58,237,.2) 0%,transparent 100%);background-size:280px 240px,350px 310px,220px 280px,400px 360px,260px 300px,310px 270px,380px 340px,290px 320px;pointer-events:none;z-index:0;-webkit-animation:starDrift 120s linear infinite;animation:starDrift 120s linear infinite}
 @keyframes starDrift{from{background-position:0 0,0 0,0 0,0 0,0 0,0 0,0 0,0 0}to{background-position:280px 240px,350px 310px,220px 280px,400px 360px,260px 300px,310px 270px,380px 340px,290px 320px}}
-body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none;z-index:1}
+body::after{content:'';position:fixed;top:0;right:0;bottom:0;left:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);pointer-events:none;z-index:1}
 
 /* INTRO */
-#intro{position:fixed;inset:0;background:#000;z-index:2000;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 1s}
+#intro{position:fixed;top:0;right:0;bottom:0;left:0;background:#000;z-index:2000;display:-webkit-box;display:-webkit-flex;display:flex;-webkit-box-orient:vertical;-webkit-box-direction:normal;-webkit-flex-direction:column;flex-direction:column;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;-webkit-transition:opacity 1s;transition:opacity 1s}
 #intro.out{opacity:0;pointer-events:none}
 #intro.gone{display:none!important}
 .il{opacity:0;transition:opacity .6s;margin:4px 0;text-align:center}
@@ -40,8 +40,8 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 #iskip:hover{border-color:#00e5ff;color:#00e5ff}
 
 /* OVERLAY: MYSTERIOUS MAN */
-#bmm-overlay{position:fixed;inset:0;background:rgba(0,0,0,.96);z-index:1500;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px;overflow-y:auto}
-#bmm-overlay.show{display:flex;animation:bmmFade 2s ease}
+#bmm-overlay{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.96);z-index:1500;display:none;-webkit-box-orient:vertical;-webkit-box-direction:normal;-webkit-flex-direction:column;flex-direction:column;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;padding:40px;overflow-y:auto}
+#bmm-overlay.show{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-animation:bmmFade 2s ease;animation:bmmFade 2s ease}
 @keyframes bmmFade{from{opacity:0}to{opacity:1}}
 .bmm-sigil{font-size:60px;margin-bottom:20px;animation:bmmPulse 3s ease infinite}
 @keyframes bmmPulse{0%,100%{filter:drop-shadow(0 0 10px #6600ff)}50%{filter:drop-shadow(0 0 40px #6600ff) drop-shadow(0 0 80px rgba(102,0,255,.5))}}
@@ -56,8 +56,8 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .bmm-dialogue{max-width:500px;margin:0 auto 20px;border-left:2px solid #6600ff;padding-left:14px;font-size:12px;color:#a080c0;line-height:1.9;font-style:italic}
 
 /* ENDING */
-#ending{position:fixed;inset:0;background:rgba(0,0,0,.98);z-index:1400;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px;overflow-y:auto}
-#ending.show{display:flex;animation:bmmFade 3s ease}
+#ending{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.98);z-index:1400;display:none;-webkit-box-orient:vertical;-webkit-box-direction:normal;-webkit-flex-direction:column;flex-direction:column;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;padding:40px;overflow-y:auto}
+#ending.show{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-animation:bmmFade 3s ease;animation:bmmFade 3s ease}
 .end-title{font-family:'Orbitron',monospace;font-size:36px;font-weight:900;letter-spacing:.08em;text-align:center;margin-bottom:8px}
 .end-sub{font-size:10px;letter-spacing:.4em;text-align:center;margin-bottom:24px}
 .end-txt{max-width:560px;text-align:center;line-height:2;margin-bottom:28px;font-size:13px;color:#c8d4e8}
@@ -70,8 +70,8 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .end-btn:hover{box-shadow:0 0 20px rgba(255,255,255,.3)}
 
 /* OMEGA CORE ANIMATION */
-#omega-overlay{position:fixed;inset:0;background:#000;z-index:3000;display:none;flex-direction:column;align-items:center;justify-content:center}
-#omega-overlay.show{display:flex}
+#omega-overlay{position:fixed;top:0;right:0;bottom:0;left:0;background:#000;z-index:3000;display:none;-webkit-box-orient:vertical;-webkit-box-direction:normal;-webkit-flex-direction:column;flex-direction:column;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center}
+#omega-overlay.show{display:-webkit-box;display:-webkit-flex;display:flex}
 .omega-ring{width:200px;height:200px;border:3px solid #6600ff;border-radius:50%;animation:omegaSpin 2s linear infinite;box-shadow:0 0 40px #6600ff,inset 0 0 40px rgba(102,0,255,.3)}
 @keyframes omegaSpin{to{transform:rotate(360deg)}}
 .omega-txt{font-family:'Orbitron',monospace;font-size:28px;color:#cc99ff;margin-top:30px;text-shadow:0 0 30px #6600ff;letter-spacing:.1em;text-align:center}
@@ -141,6 +141,35 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .tab-dot.show{display:block}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
 .debug-mode-hidden{display:none!important}
+
+/* BULK BUY BAR */
+#buy-bar{display:flex;align-items:center;gap:6px;padding:7px 14px;background:#06050e;border-bottom:1px solid #1e1c3a;position:sticky;top:0;z-index:200;flex-wrap:wrap}
+#buy-bar-label{font-size:8px;color:#4a4a6a;letter-spacing:.18em;margin-right:2px}
+.buy-btn{background:#0c0b1a;border:1px solid #2e2c4a;color:#8899aa;font-family:'Orbitron',monospace;font-size:9px;font-weight:700;padding:5px 12px;cursor:pointer;letter-spacing:.08em;transition:all .12s}
+.buy-btn:hover{border-color:#00e5ff;color:#00e5ff}
+.buy-btn.ba-active{border:2px solid #00FF00;color:#00FF00;box-shadow:0 0 10px rgba(0,255,0,.25),inset 0 0 8px rgba(0,255,0,.05)}
+#buy-bar-hint{font-size:8px;color:#3a3a5a;margin-left:4px;letter-spacing:.06em}
+
+/* VERSION BADGE */
+#ver-badge{position:fixed;bottom:8px;right:14px;font-size:8px;color:#252535;font-family:'Share Tech Mono',monospace;letter-spacing:.1em;z-index:50;pointer-events:none;user-select:none}
+#ver-badge em{color:#302a50;font-style:normal}
+
+/* SYSTEM UPDATES (Changelog) */
+.changelog-entry{padding:9px 0;border-bottom:1px solid #121122}
+.changelog-entry:last-child{border-bottom:none}
+.cl-header{display:flex;align-items:center;gap:8px;margin-bottom:4px}
+.cl-ver{font-family:'Orbitron',monospace;font-size:10px;color:#00e5ff;font-weight:700}
+.cl-type{font-size:7px;letter-spacing:.18em;padding:2px 7px;border:1px solid}
+.cl-type.debug{color:#ffa500;border-color:#3a2800}
+.cl-type.drop{color:#9f60ff;border-color:#2a0050}
+.cl-type.patch{color:#00e676;border-color:#003020}
+.cl-date{font-size:8px;color:#3a3a5a;margin-left:auto}
+.cl-notes{font-size:10px;color:#7a8a9a;line-height:1.7}
+#changelog-list{max-height:240px;overflow-y:auto;padding-right:4px}
+#changelog-list::-webkit-scrollbar{width:3px}
+#changelog-list::-webkit-scrollbar-thumb{background:#2e2c4a}
+.sv-ver-big{font-family:'Orbitron',monospace;font-size:18px;color:#9f60ff;text-shadow:0 0 20px rgba(102,0,255,.4);letter-spacing:.12em;margin-bottom:2px}
+.sv-build{font-size:9px;color:#6a4a9a;letter-spacing:.22em;margin-bottom:12px}
 
 /* CONTENT */
 #content{flex:1;overflow-y:auto;padding:14px}
@@ -314,8 +343,8 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .debug-lbl{font-size:9px;color:#7a4a7a;letter-spacing:.1em;min-width:80px}
 
 /* NAME MODAL */
-#name-modal{position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:900;display:none;flex-direction:column;align-items:center;justify-content:center}
-#name-modal.show{display:flex}
+#name-modal{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.88);z-index:900;display:none;-webkit-box-orient:vertical;-webkit-box-direction:normal;-webkit-flex-direction:column;flex-direction:column;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center}
+#name-modal.show{display:-webkit-box;display:-webkit-flex;display:flex}
 .name-box{background:#0c0b1a;border:1px solid #00e676;padding:24px;max-width:360px;width:90%;position:relative}
 .name-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,#00e676,transparent)}
 .name-title{font-family:'Orbitron',monospace;font-size:10px;color:#00e676;letter-spacing:.18em;margin-bottom:10px}
@@ -327,8 +356,8 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 .name-btn:hover{background:rgba(0,230,118,.12)}
 
 /* OFFLINE MODAL */
-#offline-modal{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1300;display:none;flex-direction:column;align-items:center;justify-content:center;padding:40px}
-#offline-modal.show{display:flex}
+#offline-modal{position:fixed;top:0;right:0;bottom:0;left:0;background:rgba(0,0,0,.92);z-index:1300;display:none;-webkit-box-orient:vertical;-webkit-box-direction:normal;-webkit-flex-direction:column;flex-direction:column;-webkit-box-align:center;-webkit-align-items:center;align-items:center;-webkit-box-pack:center;-webkit-justify-content:center;justify-content:center;padding:40px}
+#offline-modal.show{display:-webkit-box;display:-webkit-flex;display:flex}
 
 /* VERSION */
 #ver{position:fixed;bottom:8px;right:12px;font-size:9px;color:#2a2a3a;letter-spacing:.08em;z-index:10;pointer-events:none}
@@ -476,6 +505,14 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
     </div>
 
     <div id="content">
+      <div id="buy-bar">
+        <span id="buy-bar-label">BUY:</span>
+        <button class="buy-btn ba-active" id="buy-btn-1" onclick="setBuyAmount(1)">×1</button>
+        <button class="buy-btn" id="buy-btn-10" onclick="setBuyAmount(10)">×10</button>
+        <button class="buy-btn" id="buy-btn-100" onclick="setBuyAmount(100)">×100</button>
+        <button class="buy-btn" id="buy-btn-max" onclick="setBuyAmount('max')">MAX</button>
+        <span id="buy-bar-hint">— holds across all machine tabs</span>
+      </div>
 
       <!-- GATHER -->
       <div id="tab-gather">
@@ -592,6 +629,13 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
 
       <!-- STATS -->
       <div id="tab-stats" class="hidden">
+        <div class="pnl void-pnl">
+          <div class="pnl-t void">SYSTEM UPDATES</div>
+          <div class="sv-ver-big" id="sv-ver-display">v0.0.0</div>
+          <div class="sv-build" id="sv-build-display">Engine.Debug.Drop &mdash; build 000</div>
+          <div style="font-size:9px;color:#5a5a7a;margin-bottom:10px;letter-spacing:.06em">Persistent version history. Each entry represents a debug build or game drop.</div>
+          <div id="changelog-list"></div>
+        </div>
         <div class="pnl">
           <div class="pnl-t">TELEMETRY</div>
           <div id="stats-content"></div>
@@ -694,7 +738,7 @@ body::after{content:'';position:fixed;inset:0;background:repeating-linear-gradie
   </div>
 </div>
 
-<div id="ver">v1.04.12</div>
+<div id="ver-badge">THE LAST SIGNAL &nbsp;<em>v0.0.0 &mdash; Engine.Debug.Drop</em></div>
 
 <script>
 // ============================================================
@@ -732,7 +776,8 @@ var G = {
   activeEvent:null,eventTimer:0,eventInterval:0,eventLog:[],
   playerName:'CORE-01',
   lastSaveTime:Date.now(),
-  version:4
+  version:4,
+  buyAmount:1
 };
 
 // Default storage caps per resource
@@ -1094,21 +1139,75 @@ function clickCollect(ev){
 function spawnFloat(x,y,txt){var el=document.createElement('div');el.className='float-txt';el.textContent=txt;el.style.left=(x-20)+'px';el.style.top=(y-10)+'px';document.body.appendChild(el);setTimeout(function(){el.parentNode&&el.parentNode.removeChild(el);},900);}
 
 // ============================================================
-// BUY MACHINE
+// BULK BUY CONTROLS
 // ============================================================
-function buyMachine(id,n){
-  n=n||1;var mach=null;for(var i=0;i<MACHINES.length;i++){if(MACHINES[i].id===id){mach=MACHINES[i];break;}}if(!mach)return;
-  var costs=machineCost(mach,n);if(!canAfford(costs)){notify('Insufficient resources.','r');return;}
-  spend(costs);G.machines[id]=(G.machines[id]||0)+n;G.stats.totalMachines++;
-  var bk=Object.keys(mach.base);for(var bi=0;bi<bk.length;bi++)discoverResource(bk[bi]);
-  renderMachines();checkUnlocks();notify(mach.name+' x'+G.machines[id],'g');
+function setBuyAmount(v){
+  G.buyAmount=v;
+  var ids=['buy-btn-1','buy-btn-10','buy-btn-100','buy-btn-max'];
+  var vals=[1,10,100,'max'];
+  for(var i=0;i<ids.length;i++){
+    var el=document.getElementById(ids[i]);
+    if(el){if(vals[i]===v)el.classList.add('ba-active');else el.classList.remove('ba-active');}
+  }
+  renderMachines();renderStorage();
 }
 
-function buyStorage(id,n){
-  n=n||1;var bld=null;for(var i=0;i<STORAGE_BUILDINGS.length;i++){if(STORAGE_BUILDINGS[i].id===id){bld=STORAGE_BUILDINGS[i];break;}}if(!bld)return;
+function calcMaxBuy(mach){
+  var n=0;var cnt=G.machines[mach.id]||0;
+  var rate=calcCostRate()-(G.prestigeUpgrades.efficient*0.005);
+  var ascAmp=1+(G.ascensionTree['lattice_core']||0)*0.25;
+  var matComp=(G.ascensionTree['matter_comp']||0);
+  var alloyDisc=1-Math.min(0.5,matComp*0.10*ascAmp);
+  var ck=Object.keys(mach.cost);
+  // Binary search: find highest n where total cost is affordable
+  var lo=1,hi=5000,best=0;
+  while(lo<=hi){
+    var mid=Math.floor((lo+hi)/2);
+    var costs={};
+    for(var i=0;i<ck.length;i++){
+      var res=ck[i];var base=mach.cost[res];var c=0;
+      for(var j=0;j<mid;j++)c+=base*Math.pow(rate,cnt+j);
+      if(res==='alloy')c*=alloyDisc;
+      costs[res]=dc(c);
+    }
+    if(canAfford(costs)){best=mid;lo=mid+1;}else hi=mid-1;
+  }
+  return Math.max(0,best);
+}
+
+function calcMaxBuyStorage(bld){
+  var cnt=G.machines[bld.id]||0;
+  var ck=Object.keys(bld.cost);
+  var lo=1,hi=2000,best=0;
+  while(lo<=hi){
+    var mid=Math.floor((lo+hi)/2);
+    var costs={};
+    for(var i=0;i<ck.length;i++){var res=ck[i];var base=bld.cost[res];var c=0;for(var j=0;j<mid;j++)c+=base*Math.pow(1.5,cnt+j);costs[res]=dc(c);}
+    if(canAfford(costs)){best=mid;lo=mid+1;}else hi=mid-1;
+  }
+  return Math.max(0,best);
+}
+
+// ============================================================
+// BUY MACHINE
+// ============================================================
+function buyMachine(id){
+  var mach=null;for(var i=0;i<MACHINES.length;i++){if(MACHINES[i].id===id){mach=MACHINES[i];break;}}if(!mach)return;
+  var n=(G.buyAmount==='max')?calcMaxBuy(mach):(G.buyAmount||1);
+  if(n<=0){notify('Cannot afford any.','r');return;}
+  var costs=machineCost(mach,n);if(!canAfford(costs)){notify('Insufficient resources.','r');return;}
+  spend(costs);G.machines[id]=(G.machines[id]||0)+n;G.stats.totalMachines+=n;
+  var bk=Object.keys(mach.base);for(var bi=0;bi<bk.length;bi++)discoverResource(bk[bi]);
+  renderMachines();checkUnlocks();notify(mach.name+' x'+G.machines[id]+(n>1?' (+'+n+')':''),'g');
+}
+
+function buyStorage(id){
+  var bld=null;for(var i=0;i<STORAGE_BUILDINGS.length;i++){if(STORAGE_BUILDINGS[i].id===id){bld=STORAGE_BUILDINGS[i];break;}}if(!bld)return;
+  var n=(G.buyAmount==='max')?calcMaxBuyStorage(bld):(G.buyAmount||1);
+  if(n<=0){notify('Cannot afford any.','r');return;}
   var costs=storageCost(bld,n);if(!canAfford(costs)){notify('Insufficient resources.','r');return;}
   spend(costs);G.machines[id]=(G.machines[id]||0)+n;
-  notify(bld.name+' x'+G.machines[id],'g');renderStorage();
+  notify(bld.name+' x'+G.machines[id]+(n>1?' (+'+n+')':''),'g');renderStorage();
 }
 
 // ============================================================
@@ -1408,17 +1507,23 @@ function isMachineUnlocked(id){
 
 function buildMachineCard(mach){
   var unlocked=isMachineUnlocked(mach.id);var cnt=G.machines[mach.id]||0;
-  var costs=machineCost(mach,1);var afford=unlocked&&canAfford(costs);
+  var buyN=(G.buyAmount==='max')?calcMaxBuy(mach):(G.buyAmount||1);
+  var displayN=Math.max(1,buyN);
+  var costs=machineCost(mach,displayN);var afford=unlocked&&canAfford(costs)&&(buyN>0);
   var costParts=[];var ck=Object.keys(costs);for(var i=0;i<ck.length;i++)costParts.push(fmt(costs[ck[i]])+' '+ck[i]);
   var prodParts=[];var bk=Object.keys(mach.base);for(var j=0;j<bk.length;j++){if(mach.base[bk[j]]>0)prodParts.push('+'+mach.base[bk[j]]+'/s '+bk[j]);}
   var cls='mcard';if(!unlocked)cls+=' mlock';else if(afford)cls+=' mcan';if(mach.tab==='void_m')cls+=' mvoid';
-  var onclick=unlocked?('buyMachine(\''+mach.id+'\',1)'):'void 0';
+  var buyLabel=(G.buyAmount==='max')?'MAX':'×'+(G.buyAmount||1);
+  var onclick=unlocked?('buyMachine(\''+mach.id+'\')'):'void 0';
   var h='<div class="'+cls+'" onclick="'+onclick+'">';
-  if(afford)h+='<div class="mc-can-tag">BUY</div>';
+  if(afford)h+='<div class="mc-can-tag">'+buyLabel+'</div>';
   h+='<div class="mc-row"><div class="mc-name">'+mach.ico+' '+mach.name+'</div><div class="mc-cnt">'+cnt+'</div></div>';
   h+='<div class="mc-desc">'+mach.desc+'</div>';
   if(prodParts.length)h+='<div class="mc-prod">↑ '+prodParts.join(', ')+'</div>';
-  h+='<div class="mc-cost">⬡ '+costParts.join(', ')+'</div>';
+  if(G.buyAmount==='max'&&buyN>0)
+    h+='<div class="mc-cost">⬡ '+costParts.join(', ')+' <span style="color:#00FF00;font-size:8px">[BUY '+buyN+']</span></div>';
+  else
+    h+='<div class="mc-cost">⬡ '+costParts.join(', ')+(displayN>1?' <span style="font-size:8px;color:#6a7a8a">×'+displayN+'</span>':'')+'</div>';
   if(mach.energyCost&&mach.energyCost>0){var ew=mach.energyCost>=1000?(mach.energyCost/1000).toFixed(1)+'kW':mach.energyCost+'W';h+='<div style="font-size:9px;color:#ff4060;margin-top:2px">⚡ '+ew+' each</div>';}
   if(mach.special)h+='<div style="font-size:9px;color:#9f60ff;margin-top:2px">★ '+mach.special+'</div>';
   if(!unlocked)h+='<div style="font-size:9px;color:#5a5a7a;font-style:italic;margin-top:2px">🔒 Req: '+mach.unlock.replace(/_/g,' ')+'</div>';
@@ -1441,19 +1546,25 @@ function renderStorage(){
   var h='';
   for(var i=0;i<STORAGE_BUILDINGS.length;i++){
     var bld=STORAGE_BUILDINGS[i];var cnt=G.machines[bld.id]||0;
-    var costs=storageCost(bld,1);var afford=canAfford(costs);
+    var buyN=(G.buyAmount==='max')?calcMaxBuyStorage(bld):(G.buyAmount||1);
+    var displayN=Math.max(1,buyN);
+    var costs=storageCost(bld,displayN);var afford=canAfford(costs)&&(buyN>0);
     var costParts=[];var ck=Object.keys(costs);for(var ci=0;ci<ck.length;ci++)costParts.push(fmt(costs[ck[ci]])+' '+ck[ci]);
     var cap=getStorageCap(bld.res);var cur=parseFloat(G.res[bld.res]?G.res[bld.res].toString():'0');
     var pct=Math.min(100,(cur/cap)*100);
     var cls='mcard mstorage';if(afford)cls+=' mcan';
-    h+='<div class="'+cls+'" onclick="buyStorage(\''+bld.id+'\',1)">';
-    if(afford)h+='<div class="mc-can-tag">BUY</div>';
+    var buyLabel=(G.buyAmount==='max')?'MAX':'×'+(G.buyAmount||1);
+    h+='<div class="'+cls+'" onclick="buyStorage(\''+bld.id+'\')">';
+    if(afford)h+='<div class="mc-can-tag">'+buyLabel+'</div>';
     h+='<div class="mc-row"><div class="mc-name">'+bld.ico+' '+bld.name+'</div><div class="mc-cnt">'+cnt+'</div></div>';
     h+='<div class="mc-desc">'+bld.desc+'</div>';
     h+='<div class="mc-storage">Cap: '+fmt(cap)+' '+bld.res;
     h+=' <span style="font-size:8px;color:'+(pct>=100?'#ff4060':'#00e676')+'">'+pct.toFixed(1)+'%</span></div>';
     h+='<div class="tank-bg" style="margin:4px 0"><div class="tank-fill'+(pct>=90?' full':pct>=70?' warn':'')+'" style="width:'+pct+'%"></div></div>';
-    h+='<div class="mc-cost">⬡ '+costParts.join(', ')+'</div>';
+    if(G.buyAmount==='max'&&buyN>0)
+      h+='<div class="mc-cost">⬡ '+costParts.join(', ')+' <span style="color:#00FF00;font-size:8px">[BUY '+buyN+']</span></div>';
+    else
+      h+='<div class="mc-cost">⬡ '+costParts.join(', ')+(displayN>1?' <span style="font-size:8px;color:#6a7a8a">×'+displayN+'</span>':'')+'</div>';
     h+='</div>';
   }
   el.innerHTML=h;
@@ -1642,6 +1753,41 @@ function renderHUD(){
 }
 
 // ============================================================
+// VERSIONING & CHANGELOG
+// ============================================================
+var GAME_VERSION='v0.0.0';
+var GAME_BUILD='Engine.Debug.Drop';
+var CHANGELOG=[
+  {ver:'v0.0.0', type:'debug', typeLabel:'DEBUG',  date:'2026-03-28', notes:'Initial engine build. Core idle loop, resource system, and machine framework established. Prestige scaffolding active. Void Chips functional. Research tree seeded.'},
+  {ver:'v0.0.0', type:'drop',  typeLabel:'GAME DROP', date:'2026-03-28', notes:'THE LAST SIGNAL: DYSON CORE — first public deployment. 25 machines, 50-node research tree, prestige system, Void Lattice ascension, branching narrative endings, and animated Dyson ring visualization.'},
+  {ver:'v0.0.0', type:'patch', typeLabel:'PATCH',  date:'2026-03-28', notes:'Bulk Purchase System online. ×1 / ×10 / ×100 / MAX buy modes added to all Buildings and Storage tabs. MAX uses geometric series binary search for affordability. Active button gated with high-contrast #00FF00 border.'},
+  {ver:'v0.0.0', type:'debug', typeLabel:'DEBUG',  date:'2026-03-28', notes:'Versioning infrastructure injected. System Updates panel added to Data tab. Bottom-right version badge rendered. Changelog list scrollable, capped at 5 most recent entries visible.'},
+  {ver:'v0.0.0', type:'patch', typeLabel:'PATCH',  date:'2026-03-28', notes:'Deep mechanical audit: buyMachine / buyStorage refactored to single-call signatures. buildMachineCard updated to reflect active buy quantity in cost display. renderStorage bulk-aware. Storage buy MAX uses storageCost geometric series.'}
+];
+
+function renderSystemUpdates(){
+  var verEl=document.getElementById('sv-ver-display');
+  var buildEl=document.getElementById('sv-build-display');
+  if(verEl)verEl.textContent=GAME_VERSION;
+  if(buildEl)buildEl.textContent=GAME_BUILD+' \u2014 build '+String(CHANGELOG.length).padStart(3,'0');
+  var el=document.getElementById('changelog-list');if(!el)return;
+  var entries=CHANGELOG.slice().reverse().slice(0,5);// 5 most recent
+  var h='';
+  for(var i=0;i<entries.length;i++){
+    var e=entries[i];
+    h+='<div class="changelog-entry">';
+    h+='<div class="cl-header">';
+    h+='<span class="cl-ver">'+e.ver+'</span>';
+    h+='<span class="cl-type '+e.type+'">'+e.typeLabel+'</span>';
+    h+='<span class="cl-date">'+e.date+'</span>';
+    h+='</div>';
+    h+='<div class="cl-notes">'+e.notes+'</div>';
+    h+='</div>';
+  }
+  el.innerHTML=h;
+}
+
+// ============================================================
 // RENDER STATS
 // ============================================================
 function renderStats(){
@@ -1664,6 +1810,7 @@ function renderStats(){
   sh+='<div class="srow"><span class="sl">Event Timer</span><span class="sv">'+Math.ceil(G.eventTimer||0)+'s</span></div>';
   sh+='<div class="srow"><span class="sl">Omega Core</span><span class="sv" style="color:'+(G.flags.omegaUnlocked?'#ffdd00':'#5a5a7a')+'">'+(G.flags.omegaUnlocked?'ACTIVE':'LOCKED')+'</span></div>';
   document.getElementById('stats-content').innerHTML=sh;
+  renderSystemUpdates();
 }
 
 // ============================================================
@@ -1688,7 +1835,7 @@ function showTab(tab){
   if(tab==='research')renderResearch();
   if(tab==='void')renderVoidTab();
   if(tab==='codex')renderCodex();
-  if(tab==='stats')renderStats();
+  if(tab==='stats'){renderStats();renderSystemUpdates();}
   if(tab==='ascension')renderAscensionTab();
   if(tab==='events')renderEventLog();
   if(tab==='storage')renderStorage();
@@ -1791,6 +1938,7 @@ function loadGame(){
     if(G.flags.dysonUnlocked)unlockTab('dyson');
     if(G.flags.voidUnlocked)unlockTab('void');
     if(G.flags.ascensionUnlocked){var ab=document.getElementById('tb-ascension');if(ab)ab.style.display='';}
+    if(data.buyAmount!==undefined)G.buyAmount=data.buyAmount;
     updatePhase();
     var savedAt=data.lastSaveTime||Date.now();var offlineSec=Math.min((Date.now()-savedAt)/1000,MAX_OFFLINE_SEC);
     if(offlineSec>30)G._offlineGains=computeOfflineGains(offlineSec);
@@ -1855,6 +2003,8 @@ function launchGame(){
     document.getElementById('intro').classList.add('gone');
     document.getElementById('game').classList.add('vis');
     log('SIGNAL ESTABLISHED.','tc');log('I am awake. I am alone. I must gather photons.','tv');
+    // Sync buy bar to loaded/default state
+    setBuyAmount(G.buyAmount||1);
     // Name input key handler
     var inp=document.getElementById('name-input');
     if(inp&&!inp._bound){inp._bound=true;inp.addEventListener('keydown',function(e){if(e.key==='Enter'||e.keyCode===13)savePlayerName();if(e.key==='Escape'||e.keyCode===27)closeNameModal();});}
