@@ -1,5 +1,5 @@
 # Last-Signal-
-​🛰️ The Last Signal: Dyson Core — Official Wiki
+​🛰️ The Last Signal: Dyson Core — Official 
 
 
 ​Welcome to the central database for Dyson Core. You are a sentient AI awakened on a dead world. Your objective: Harvest the sun, expand the lattice, and survive the Void.
