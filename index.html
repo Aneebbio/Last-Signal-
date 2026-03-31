@@ -167,6 +167,17 @@ body::after{content:'';position:fixed;top:0;right:0;bottom:0;left:0;background:r
 .tab-dot.show{display:block}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
 .debug-mode-hidden{display:none!important}
+/* SUB-TABS */
+.subtab-bar{display:-webkit-box;display:-webkit-flex;display:flex;-webkit-flex-wrap:wrap;flex-wrap:wrap;gap:5px;padding:8px 14px;background:#08060f;border-bottom:1px solid #1e1c3a;position:sticky;top:0;z-index:190}
+.stab{background:#0c0b1a;border:2px solid #2e2c4a;color:#7a8a9a;font-family:'Orbitron',monospace;font-size:8px;font-weight:700;padding:8px 14px;cursor:pointer;letter-spacing:.1em;min-width:60px;text-align:center;-webkit-transition:all .12s;transition:all .12s}
+.stab:hover{border-color:#00e5ff;color:#00e5ff}
+.stab.sta{border-color:#00e5ff;color:#00e5ff;background:rgba(0,229,255,.1);box-shadow:0 0 8px rgba(0,229,255,.2)}
+.stab.sta-sci{border-color:#00e676;color:#00e676;background:rgba(0,230,118,.1)}
+/* ERROR FLASH */
+@-webkit-keyframes tankFlash{0%,100%{border-color:#ff4060;box-shadow:0 0 12px rgba(255,64,96,.6)}50%{border-color:#ff4060;box-shadow:0 0 24px rgba(255,64,96,.9)}}
+@keyframes tankFlash{0%,100%{border-color:#ff4060;box-shadow:0 0 12px rgba(255,64,96,.6)}50%{border-color:#ff4060;box-shadow:0 0 24px rgba(255,64,96,.9)}}
+.res-card.tank-err{-webkit-animation:tankFlash .4s ease 3;animation:tankFlash .4s ease 3}
+.notif.err{border-left-color:#ff4060;background:#1a0810;font-family:'Share Tech Mono',monospace}
 #content{-webkit-box-flex:1;-webkit-flex:1;flex:1;overflow-y:auto;padding:0}
 #content::-webkit-scrollbar{width:4px}
 #content::-webkit-scrollbar-thumb{background:#2e2c4a}
@@ -459,7 +470,7 @@ body::after{content:'';position:fixed;top:0;right:0;bottom:0;left:0;background:r
 </div>
 
 <div id="notifs"></div>
-<div id="ver-badge">THE LAST SIGNAL &nbsp;<em>v1.0.0 &mdash; Engine.0.Debug.0.Drop</em></div>
+<div id="ver-badge">THE LAST SIGNAL &nbsp;<em>v1.0.1 &mdash; Engine.Debug.Drop</em></div>
 
 <div id="game">
   <div id="hdr">
@@ -520,6 +531,14 @@ body::after{content:'';position:fixed;top:0;right:0;bottom:0;left:0;background:r
       </div>
 
       <div id="tab-gather" class="tab-inner">
+        <div class="subtab-bar" id="res-subtab-bar">
+          <button class="stab sta" onclick="setResSubtab('all')">ALL</button>
+          <button class="stab" id="stab-photons" onclick="setResSubtab('photons')">&#x26A1; PHOTONS</button>
+          <button class="stab" id="stab-metal" onclick="setResSubtab('metal')">&#x1F9B4; METAL</button>
+          <button class="stab" id="stab-regolith" onclick="setResSubtab('regolith')">&#x1F30B; REGOLITH</button>
+          <button class="stab" id="stab-copper" onclick="setResSubtab('copper')">&#x1F536; COPPER/SI</button>
+          <button class="stab sta-sci" id="stab-science" onclick="setResSubtab('science')">&#x1F9EC; SCIENCE</button>
+        </div>
         <div class="pnl" style="text-align:center;padding:16px">
           <div style="font-family:'Orbitron',monospace;font-size:10px;color:#00e5ff;letter-spacing:.1em;margin-bottom:8px">BOOT SEQUENCE</div>
           <div id="lore-txt" style="font-size:10px;color:#6a7a8a;line-height:1.9;max-width:440px;margin:0 auto">Darkness. Silence. A dead world stares back at me.<br>I am a damaged AI. My core is dying.<br><em style="color:#00e5ff">Gather photons. Or cease to exist.</em></div>
@@ -659,8 +678,8 @@ body::after{content:'';position:fixed;top:0;right:0;bottom:0;left:0;background:r
       <div id="tab-stats" class="hidden tab-inner">
         <div class="pnl void-pnl">
           <div class="pnl-t void">SYSTEM UPDATES</div>
-          <div class="sv-ver-big" id="sv-ver-display">v1.0.0</div>
-          <div class="sv-build" id="sv-build-display">Engine.0.Debug.0.Drop</div>
+          <div class="sv-ver-big" id="sv-ver-display">v1.0.1</div>
+          <div class="sv-build" id="sv-build-display">Engine.Debug.Drop</div>
           <div style="font-size:9px;color:#5a5a7a;margin-bottom:10px">Version history.</div>
           <div id="changelog-list"></div>
         </div>
@@ -694,6 +713,13 @@ body::after{content:'';position:fixed;top:0;right:0;bottom:0;left:0;background:r
             <button class="debug-btn" onclick="debugTriggerBMM()">SUMMON MAN</button>
             <button class="debug-btn" onclick="debugUnlockAll()">ALL TABS</button>
             <button class="debug-btn" onclick="debugTriggerEvent()">EVENT</button>
+          </div>
+          <div style="margin-top:10px;border-top:1px solid rgba(255,0,255,.15);padding-top:10px">
+            <div style="font-size:8px;color:#7a4a7a;letter-spacing:.12em;margin-bottom:8px">VOID SUITE &mdash; HIGH-TIER TESTING</div>
+            <div class="debug-row">
+              <button class="debug-btn" style="border-color:#ff00ff;color:#ff88ff;font-size:8px;padding:8px 14px" onclick="debugGet100AllMachines()">[GET 100 ALL MACHINES]</button>
+              <button class="debug-btn" style="border-color:#ff00ff;color:#ff88ff;font-size:8px;padding:8px 14px" onclick="debugInjectAllResources()">[INJECT ALL RESOURCES]</button>
+            </div>
           </div>
         </div>
       </div>
@@ -778,37 +804,36 @@ var RES_LORE={
 };
 
 var MACHINES=[
-  {id:'photon_col',  tab:'gather',  name:'Photon Collector',    ico:'\uD83D\uDD06',desc:'Passively harvests photons.',base:{photons:0.5},cost:{photons:12},unlock:'start',energyCost:0.05},
-  {id:'k_treadmill', tab:'gather',  name:'Kinetic Treadmill',   ico:'\uD83C\uDFC3',desc:'Converts motion to Power.',base:{power:1},cost:{photons:60},unlock:'start',energyCost:0},
-  {id:'scrap_sorter',tab:'gather',  name:'Scrap Sorter',        ico:'\uD83D\uDDC2',desc:'Sorts debris for Metal.',base:{metal:0.3},cost:{photons:100},unlock:'start',energyCost:0.1},
-  {id:'reg_shovel',  tab:'gather',  name:'Regolith Shovel',     ico:'\u26CF',desc:'Scoops Regolith.',base:{regolith:0.4},cost:{photons:150,metal:3},unlock:'start',energyCost:0.15},
-  {id:'circ_salv',   tab:'gather',  name:'Circuitry Salvager',  ico:'\uD83D\uDD0C',desc:'Recovers Copper and Silicon.',base:{copper:0.2,silicon:0.15},cost:{photons:300,metal:8},unlock:'start',energyCost:0.2},
-  {id:'auto_drill',  tab:'base',    name:'Auto-Drill',          ico:'\uD83E\uDD16',desc:'Extracts Regolith and Metal.',base:{regolith:1,metal:0.6},cost:{photons:800,alloy:4},unlock:'base_unlock',energyCost:2},
-  {id:'smelter',     tab:'base',    name:'Smelter',             ico:'\uD83D\uDD25',desc:'2 Metal/s to 1 Alloy/s.',base:{alloy:1},consumes:{metal:2},cost:{photons:1400,metal:40},unlock:'base_unlock',energyCost:3},
-  {id:'atmos_cond',  tab:'base',    name:'Atmos. Condenser',    ico:'\uD83C\uDF2B',desc:'Pulls Trace Gases.',base:{gas:0.8},cost:{photons:2500,alloy:12},unlock:'base_unlock',energyCost:2.5},
-  {id:'si_extractor',tab:'base',    name:'Silicon Extractor',   ico:'\uD83D\uDC8E',desc:'Purifies Silicon.',base:{silicon:2},cost:{photons:4000,alloy:22,copper:15},unlock:'base_unlock',energyCost:4},
-  {id:'geo_well',    tab:'base',    name:'Geothermal Well',     ico:'\uD83C\uDF0B',desc:'Taps magma for Power.',base:{power:8},cost:{photons:6000,alloy:45,regolith:150},unlock:'geo_well_res',energyCost:0},
-  {id:'star_lifter', tab:'stellar', name:'Star Lifter',         ico:'\u2600\uFE0F',desc:'Steals Solar Plasma.',base:{plasma:0.5},cost:{photons:5e5,alloy:3000,silicon:1500,power:300},unlock:'stellar_unlock',energyCost:80},
-  {id:'diamond_anvil',tab:'stellar',name:'Diamond Anvil',       ico:'\uD83D\uDC8E',desc:'Compresses H to Metallic Hydrogen.',base:{mH:0.1},cost:{photons:2e6,alloy:12000,plasma:80},unlock:'stellar_unlock',energyCost:200},
-  {id:'hadron_shred', tab:'stellar',name:'Hadron Shredder',     ico:'\u269B',desc:'Produces QGP.',base:{qgp:0.05},cost:{photons:8e6,silicon:30000,plasma:400,power:1500},unlock:'stellar_unlock',energyCost:500},
-  {id:'neutron_siph', tab:'stellar',name:'Neutron Siphon',      ico:'\u2B50',desc:'Harvests Neutronium.',base:{neutron:0.02},cost:{photons:4e7,alloy:6e4,qgp:80},unlock:'neutron_res',energyCost:1500},
-  {id:'fusion_react', tab:'stellar',name:'Fusion Reactor',      ico:'\uD83D\uDD0B',desc:'Massive Power output.',base:{power:100},cost:{photons:2e7,mH:400,plasma:150},unlock:'fusion_res',energyCost:0},
-  {id:'dyson_seg',   tab:'dyson',   name:'Dyson Mirror Segment',ico:'\uD83C\uDF1E',desc:'+0.5% Dyson.',dysonVal:0.5,base:{plasma:5},cost:{photons:4e8,alloy:7e4,silicon:3e4,neutron:40},unlock:'dyson_unlock',energyCost:2000},
-  {id:'dyson_ring',  tab:'dyson',   name:'Dyson Collector Ring',ico:'\uD83D\uDC8D',desc:'+2% Dyson.',dysonVal:2,base:{plasma:50,power:200},cost:{photons:4e10,alloy:7e5,neutron:400,mH:8000},unlock:'dyson_unlock',energyCost:15000},
-  {id:'dyson_tap',   tab:'dyson',   name:'Stellar Tap Array',   ico:'\uD83C\uDF10',desc:'+10% Dyson.',dysonVal:10,base:{plasma:500,power:2000},cost:{photons:4e13,neutron:4e4,qgp:8000,mH:8e4},unlock:'dyson_unlock',energyCost:100000},
-  {id:'dyson_shell', tab:'dyson',   name:'Dyson Shell Plate',   ico:'\u26AB',desc:'+5% Dyson. Generates Antimatter.',dysonVal:5,base:{plasma:200,antimatter:0.02},cost:{photons:4e11,neutron:8000,dark:200},unlock:'dyson_unlock',energyCost:50000},
-  {id:'dm_siphon',   tab:'void_m',  name:'Dark Matter Siphon',  ico:'\uD83C\uDF11',desc:'Generates Dark Matter.',base:{dark:1},cost:{photons:4e11,neutron:8000},unlock:'void_dark',energyCost:50000},
-  {id:'temp_stab',   tab:'void_m',  name:'Temporal Stabilizer', ico:'\u23F1',desc:'+15% game speed.',special:'+15% speed',base:{},cost:{dark:400,neutron:8e4},unlock:'void_temporal',energyCost:80000},
-  {id:'entropy_anch',tab:'void_m',  name:'Entropy Anchor',      ico:'\u2693',desc:'-5% Energy Limit rate.',special:'-5% limit',base:{},cost:{dark:800,qgp:8000},unlock:'void_entropy',energyCost:30000},
-  {id:'void_comp',   tab:'void_m',  name:'Void Compressor',     ico:'\u267E',desc:'+50% all storage caps.',special:'+50% caps',base:{},cost:{dark:4000,gravit:80},unlock:'void_comp_r',energyCost:120000},
-  {id:'singularity', tab:'void_m',  name:'Singularity Forge',   ico:'\uD83D\uDC80',desc:'Neutronium to Gravitons.',base:{gravit:0.5},cost:{neutron:8e5,dark:8000},unlock:'void_singularity',energyCost:500000},
-  {id:'logic_burner',tab:'void_m',  name:'Logic Burner',        ico:'\uD83D\uDD25',desc:'Omni-Fuel to +1% global/s.',special:'Burn for mult',base:{},cost:{omni:80,dark:8000},unlock:'void_logic',energyCost:200000},
-  {id:'reality_wv',  tab:'void_m',  name:'Reality Weaver',      ico:'\uD83C\uDF08',desc:'Produces Omni-Fuel.',base:{omni:0.1},cost:{gravit:800,dark:8e4},unlock:'void_reality',energyCost:1e6},
-  {id:'sci_t1',      tab:'sci',     name:'Signal Amplifier',    ico:'\uD83D\uDCE1',desc:'T1: 0.1 Science/s',base:{science:0.1},cost:{photons:50},unlock:'start',energyCost:1},
-  {id:'sci_t2',      tab:'sci',     name:'Data Processor',      ico:'\uD83D\uDCBB',desc:'T2: 1 Science/s',base:{science:1},cost:{photons:500,metal:10},unlock:'sci_t2_res',energyCost:5},
-  {id:'sci_t3',      tab:'sci',     name:'Neural Core',         ico:'\uD83E\uDDE0',desc:'T3: 100 Science/s',base:{science:100},cost:{photons:5000,alloy:50},unlock:'sci_t3_res',energyCost:20},
-  {id:'sci_t4',      tab:'sci',     name:'Quantum Analyzer',    ico:'\uD83D\uDD2C',desc:'T4: 1000 Science/s',base:{science:1000},cost:{photons:5e5,silicon:500},unlock:'sci_t4_res',energyCost:100},
-  {id:'sci_t5',      tab:'sci',     name:'Void Intellect',      ico:'\u221E',desc:'T5: 10000 Science/s',base:{science:10000},cost:{dark:1000,gravit:100},unlock:'void_sci_node',energyCost:500}
+  {id:'photon_col',  tab:'gather',  resTag:'photons', name:'Photon Collector',    ico:'\uD83D\uDD06',desc:'Passively harvests photons.',base:{photons:0.5},cost:{photons:12},unlock:'start',energyCost:0.05},
+  {id:'scrap_sorter',tab:'gather',  resTag:'metal',   name:'Scrap Sorter',        ico:'\uD83D\uDDC2',desc:'Sorts debris for Metal.',base:{metal:0.3},cost:{photons:100},unlock:'start',energyCost:0.1},
+  {id:'reg_shovel',  tab:'gather',  resTag:'regolith',name:'Regolith Shovel',     ico:'\u26CF',desc:'Scoops Regolith.',base:{regolith:0.4},cost:{photons:150,metal:3},unlock:'start',energyCost:0.15},
+  {id:'circ_salv',   tab:'gather',  resTag:'copper',  name:'Circuitry Salvager',  ico:'\uD83D\uDD0C',desc:'Recovers Copper and Silicon.',base:{copper:0.2,silicon:0.15},cost:{photons:300,metal:8},unlock:'start',energyCost:0.2},
+  {id:'auto_drill',  tab:'base',    resTag:'metal',   name:'Auto-Drill',          ico:'\uD83E\uDD16',desc:'Extracts Regolith and Metal.',base:{regolith:1,metal:0.6},cost:{photons:800,alloy:4},unlock:'base_unlock',energyCost:2},
+  {id:'smelter',     tab:'base',    resTag:'alloy',   name:'Smelter',             ico:'\uD83D\uDD25',desc:'2 Metal/s to 1 Alloy/s.',base:{alloy:1},consumes:{metal:2},cost:{photons:1400,metal:40},unlock:'base_unlock',energyCost:3},
+  {id:'atmos_cond',  tab:'base',    resTag:'gas',     name:'Atmos. Condenser',    ico:'\uD83C\uDF2B',desc:'Pulls Trace Gases.',base:{gas:0.8},cost:{photons:2500,alloy:12},unlock:'base_unlock',energyCost:2.5},
+  {id:'si_extractor',tab:'base',    resTag:'silicon', name:'Silicon Extractor',   ico:'\uD83D\uDC8E',desc:'Purifies Silicon.',base:{silicon:2},cost:{photons:4000,alloy:22,copper:15},unlock:'base_unlock',energyCost:4},
+  {id:'geo_well',    tab:'base',    resTag:'power',   name:'Geothermal Well',     ico:'\uD83C\uDF0B',desc:'Taps magma for Power.',base:{power:8},cost:{photons:6000,alloy:45,regolith:150},unlock:'geo_well_res',energyCost:0},
+  {id:'star_lifter', tab:'stellar', resTag:'plasma',  name:'Star Lifter',         ico:'\u2600\uFE0F',desc:'Steals Solar Plasma.',base:{plasma:0.5},cost:{photons:5e5,alloy:3000,silicon:1500,power:300},unlock:'stellar_unlock',energyCost:80},
+  {id:'diamond_anvil',tab:'stellar',resTag:'mH',      name:'Diamond Anvil',       ico:'\uD83D\uDC8E',desc:'Compresses H to Metallic Hydrogen.',base:{mH:0.1},cost:{photons:2e6,alloy:12000,plasma:80},unlock:'stellar_unlock',energyCost:200},
+  {id:'hadron_shred', tab:'stellar',resTag:'qgp',     name:'Hadron Shredder',     ico:'\u269B',desc:'Produces QGP.',base:{qgp:0.05},cost:{photons:8e6,silicon:30000,plasma:400,power:1500},unlock:'stellar_unlock',energyCost:500},
+  {id:'neutron_siph', tab:'stellar',resTag:'neutron', name:'Neutron Siphon',      ico:'\u2B50',desc:'Harvests Neutronium.',base:{neutron:0.02},cost:{photons:4e7,alloy:6e4,qgp:80},unlock:'neutron_res',energyCost:1500},
+  {id:'fusion_react', tab:'stellar',resTag:'power',   name:'Fusion Reactor',      ico:'\uD83D\uDD0B',desc:'Massive Power output.',base:{power:100},cost:{photons:2e7,mH:400,plasma:150},unlock:'fusion_res',energyCost:0},
+  {id:'dyson_seg',   tab:'dyson',   resTag:'plasma',  name:'Dyson Mirror Segment',ico:'\uD83C\uDF1E',desc:'+0.5% Dyson.',dysonVal:0.5,base:{plasma:5},cost:{photons:4e8,alloy:7e4,silicon:3e4,neutron:40},unlock:'dyson_unlock',energyCost:2000},
+  {id:'dyson_ring',  tab:'dyson',   resTag:'plasma',  name:'Dyson Collector Ring',ico:'\uD83D\uDC8D',desc:'+2% Dyson.',dysonVal:2,base:{plasma:50,power:200},cost:{photons:4e10,alloy:7e5,neutron:400,mH:8000},unlock:'dyson_unlock',energyCost:15000},
+  {id:'dyson_tap',   tab:'dyson',   resTag:'plasma',  name:'Stellar Tap Array',   ico:'\uD83C\uDF10',desc:'+10% Dyson.',dysonVal:10,base:{plasma:500,power:2000},cost:{photons:4e13,neutron:4e4,qgp:8000,mH:8e4},unlock:'dyson_unlock',energyCost:100000},
+  {id:'dyson_shell', tab:'dyson',   resTag:'antimatter',name:'Dyson Shell Plate', ico:'\u26AB',desc:'+5% Dyson. Generates Antimatter.',dysonVal:5,base:{plasma:200,antimatter:0.02},cost:{photons:4e11,neutron:8000,dark:200},unlock:'dyson_unlock',energyCost:50000},
+  {id:'dm_siphon',   tab:'void_m',  resTag:'dark',    name:'Dark Matter Siphon',  ico:'\uD83C\uDF11',desc:'Generates Dark Matter.',base:{dark:1},cost:{photons:4e11,neutron:8000},unlock:'void_dark',energyCost:50000},
+  {id:'temp_stab',   tab:'void_m',  resTag:'speed',   name:'Temporal Stabilizer', ico:'\u23F1',desc:'+15% game speed.',special:'+15% speed',base:{},cost:{dark:400,neutron:8e4},unlock:'void_temporal',energyCost:80000},
+  {id:'entropy_anch',tab:'void_m',  resTag:'special', name:'Entropy Anchor',      ico:'\u2693',desc:'-5% Energy Limit rate.',special:'-5% limit',base:{},cost:{dark:800,qgp:8000},unlock:'void_entropy',energyCost:30000},
+  {id:'void_comp',   tab:'void_m',  resTag:'special', name:'Void Compressor',     ico:'\u267E',desc:'+50% all storage caps.',special:'+50% caps',base:{},cost:{dark:4000,gravit:80},unlock:'void_comp_r',energyCost:120000},
+  {id:'singularity', tab:'void_m',  resTag:'gravit',  name:'Singularity Forge',   ico:'\uD83D\uDC80',desc:'Neutronium to Gravitons.',base:{gravit:0.5},cost:{neutron:8e5,dark:8000},unlock:'void_singularity',energyCost:500000},
+  {id:'logic_burner',tab:'void_m',  resTag:'special', name:'Logic Burner',        ico:'\uD83D\uDD25',desc:'Omni-Fuel to +1% global/s.',special:'Burn for mult',base:{},cost:{omni:80,dark:8000},unlock:'void_logic',energyCost:200000},
+  {id:'reality_wv',  tab:'void_m',  resTag:'omni',    name:'Reality Weaver',      ico:'\uD83C\uDF08',desc:'Produces Omni-Fuel.',base:{omni:0.1},cost:{gravit:800,dark:8e4},unlock:'void_reality',energyCost:1e6},
+  {id:'sci_t1',      tab:'sci',     resTag:'science', name:'Signal Amplifier',    ico:'\uD83D\uDCE1',desc:'T1: 0.1 Science/s',base:{science:0.1},cost:{photons:50},unlock:'start',energyCost:1},
+  {id:'sci_t2',      tab:'sci',     resTag:'science', name:'Data Processor',      ico:'\uD83D\uDCBB',desc:'T2: 1 Science/s',base:{science:1},cost:{photons:500,metal:10},unlock:'sci_t2_res',energyCost:5},
+  {id:'sci_t3',      tab:'sci',     resTag:'science', name:'Neural Core',         ico:'\uD83E\uDDE0',desc:'T3: 100 Science/s',base:{science:100},cost:{photons:5000,alloy:50},unlock:'sci_t3_res',energyCost:20},
+  {id:'sci_t4',      tab:'sci',     resTag:'science', name:'Quantum Analyzer',    ico:'\uD83D\uDD2C',desc:'T4: 1000 Science/s',base:{science:1000},cost:{photons:5e5,silicon:500},unlock:'sci_t4_res',energyCost:100},
+  {id:'sci_t5',      tab:'sci',     resTag:'science', name:'Void Intellect',      ico:'\u221E',desc:'T5: 10000 Science/s',base:{science:10000},cost:{dark:1000,gravit:100},unlock:'void_sci_node',energyCost:500}
 ];
 
 var GENERATORS=[
@@ -955,6 +980,30 @@ function generatorCost(gen,n){
   return costs;
 }
 function canAfford(costs){var ks=Object.keys(costs);for(var i=0;i<ks.length;i++){if(!G.res[ks[i]]||dc(G.res[ks[i]]).lt(costs[ks[i]]))return false;}return true;}
+function canAffordDetailed(costs){
+  var missing=[];var ks=Object.keys(costs);
+  for(var i=0;i<ks.length;i++){
+    if(!G.res[ks[i]]||dc(G.res[ks[i]]).lt(costs[ks[i]])){
+      var have=G.res[ks[i]]?parseFloat(G.res[ks[i]].toString()):0;
+      var need=parseFloat(costs[ks[i]].toString());
+      missing.push('Need '+fmt(dc(need))+' '+ks[i]+' (have '+fmt(dc(have))+')');
+      flashTank(ks[i]);
+    }
+  }
+  return missing;
+}
+function flashTank(resKey){
+  var cards=document.querySelectorAll('.res-card[data-res="'+resKey+'"]');
+  for(var i=0;i<cards.length;i++){
+    (function(card){
+      card.classList.remove('tank-err');
+      // Force reflow for re-trigger
+      void card.offsetWidth;
+      card.classList.add('tank-err');
+      setTimeout(function(){card.classList.remove('tank-err');},1300);
+    })(cards[i]);
+  }
+}
 function spend(costs){var ks=Object.keys(costs);for(var i=0;i<ks.length;i++){var rk=ks[i];if(G.res[rk]!==undefined){G.res[rk]=dc(G.res[rk]).sub(costs[rk]);if(parseFloat(G.res[rk].toString())<0)G.res[rk]=dc(0);}}}
 function calcPowerGrid(){
   if(!G||!GENERATORS||!MACHINES)return{supply:0,demand:0,ratio:1,powerMult:1,deficit:false};
@@ -1040,8 +1089,13 @@ function isMachineUnlocked(id){
 }
 function buyMachine(id){
   var mach=null;for(var i=0;i<MACHINES.length;i++)if(MACHINES[i].id===id){mach=MACHINES[i];break;}if(!mach)return;
-  var n=(G.buyAmount==='max')?calcMaxBuy(mach):(G.buyAmount||1);if(n<=0){notify('Cannot afford any.','r');return;}
-  var costs=machineCost(mach,n);if(!canAfford(costs)){notify('Insufficient resources.','r');return;}
+  var n=(G.buyAmount==='max')?calcMaxBuy(mach):(G.buyAmount||1);if(n<=0){notify('[ERROR] Cannot afford any '+mach.name+'.','err');return;}
+  var costs=machineCost(mach,n);
+  if(!canAfford(costs)){
+    var missing=canAffordDetailed(costs);
+    var msg='[ERROR] INSUFFICIENT RESOURCES: '+missing.join(' / ');
+    notify(msg,'err');log(msg,'tr');return;
+  }
   spend(costs);G.machines[id]=(G.machines[id]||0)+n;G.stats.totalMachines+=n;
   var bk=Object.keys(mach.base);for(var bi=0;bi<bk.length;bi++)discoverResource(bk[bi]);
   renderMachines();checkUnlocks();notify(mach.name+' x'+G.machines[id]+(n>1?' (+'+n+')':''),'g');
@@ -1055,8 +1109,12 @@ function sellMachine(id){
 }
 function buyGenerator(id){
   var gen=null;for(var i=0;i<GENERATORS.length;i++)if(GENERATORS[i].id===id){gen=GENERATORS[i];break;}if(!gen)return;
-  var n=(G.buyAmount==='max')?calcMaxBuyGen(gen):(G.buyAmount||1);if(n<=0){notify('Cannot afford any.','r');return;}
-  var costs=generatorCost(gen,n);if(!canAfford(costs)){notify('Insufficient resources.','r');return;}
+  var n=(G.buyAmount==='max')?calcMaxBuyGen(gen):(G.buyAmount||1);if(n<=0){notify('[ERROR] Cannot afford any '+gen.name+'.','err');return;}
+  var costs=generatorCost(gen,n);
+  if(!canAfford(costs)){
+    var missing=canAffordDetailed(costs);
+    notify('[ERROR] INSUFFICIENT RESOURCES: '+missing.join(' / '),'err');return;
+  }
   spend(costs);G.machines[id]=(G.machines[id]||0)+n;notify(gen.name+' x'+G.machines[id]+(n>1?' (+'+n+')':''),'g');renderPowerGrid();
 }
 function sellGenerator(id){
@@ -1067,9 +1125,12 @@ function sellGenerator(id){
 }
 function buyResearch(id){
   if(G.research[id])return;var node=null;for(var i=0;i<RESEARCH.length;i++)if(RESEARCH[i].id===id){node=RESEARCH[i];break;}if(!node)return;
-  for(var ri=0;ri<node.req.length;ri++)if(!G.research[node.req[ri]]){notify('Prerequisites not met.','r');return;}
+  for(var ri=0;ri<node.req.length;ri++)if(!G.research[node.req[ri]]){notify('[ERROR] PREREQUISITE NOT MET: Need Research "'+node.req[ri].replace(/_/g,' ')+'".','err');return;}
   var costs={};var ck=Object.keys(node.cost);for(var ci=0;ci<ck.length;ci++)costs[ck[ci]]=dc(node.cost[ck[ci]]);
-  if(!canAfford(costs)){notify('Insufficient resources.','r');return;}
+  if(!canAfford(costs)){
+    var missing=canAffordDetailed(costs);
+    notify('[ERROR] INSUFFICIENT RESOURCES: '+missing.join(' / '),'err');return;
+  }
   spend(costs);G.research[id]=true;
   if(id==='base_unlock'){G.flags.baseUnlocked=true;unlockTab('production');}
   if(id==='stellar_unlock')G.flags.stellarUnlocked=true;
@@ -1131,7 +1192,10 @@ function buyRebootUpgrade(id){
   var upg=null;for(var i=0;i<REBOOT_UPGRADES.length;i++)if(REBOOT_UPGRADES[i].id===id){upg=REBOOT_UPGRADES[i];break;}if(!upg)return;
   var cur=G.reboot[id]||0;var ck=Object.keys(upg.baseCost);var costs={};
   for(var i=0;i<ck.length;i++)costs[ck[i]]=dc(upg.baseCost[ck[i]]*Math.pow(2,cur));
-  if(!canAfford(costs)){notify('Insufficient resources.','r');return;}
+  if(!canAfford(costs)){
+    var missing=canAffordDetailed(costs);
+    notify('[ERROR] INSUFFICIENT RESOURCES: '+missing.join(' / '),'err');return;
+  }
   spend(costs);G.reboot[id]=cur+1;
   if(upg.effect==='heal'){G.adventure.maxHp+=10;G.adventure.hp=Math.min(G.adventure.maxHp,G.adventure.hp+20);notify('+20 HP, MaxHP +10.','g');}
   else notify(upg.name+' Lv'+(cur+1),'g');renderReboot();
@@ -1141,7 +1205,10 @@ function buyVessel(zone){
   var vid='vessel_'+zone;var n=(G.buyAmount==='max')?1:(G.buyAmount||1);
   var cnt=G.machines[vid]||0;var ck=Object.keys(vd.cost);var costs={};
   for(var i=0;i<ck.length;i++){var c=0;for(var j=0;j<n;j++)c+=vd.cost[ck[i]]*Math.pow(1.15,cnt+j);costs[ck[i]]=dc(c);}
-  if(!canAfford(costs)){notify('Insufficient resources.','r');return;}
+  if(!canAfford(costs)){
+    var missing=canAffordDetailed(costs);
+    notify('[ERROR] INSUFFICIENT RESOURCES: '+missing.join(' / '),'err');return;
+  }
   spend(costs);G.machines[vid]=(G.machines[vid]||0)+n;
   notify(vd.name+' x'+G.machines[vid],'a');renderExplore();
 }
@@ -1216,12 +1283,45 @@ function buildMachineCard(mach){
   if(!unlocked)h+='<div style="font-size:9px;color:#5a5a7a;font-style:italic;margin-top:2px">\uD83D\uDD12 Req: '+mach.unlock.replace(/_/g,' ')+'</div>';
   h+='</div>';return h;
 }
+// ============================================================
+// RESOURCE SUB-TABS
+// ============================================================
+var activeResSubtab='all';
+function setResSubtab(tag){
+  activeResSubtab=tag;
+  // Update button states
+  var stabs=document.querySelectorAll('.subtab-bar .stab');
+  for(var i=0;i<stabs.length;i++){
+    stabs[i].className=stabs[i].className.replace(' sta','').replace(' sta-sci','');
+  }
+  var activeBtn=document.getElementById('stab-'+tag);
+  if(activeBtn){
+    activeBtn.className+=tag==='science'?' sta-sci':' sta';
+  } else {
+    // "ALL" button — first stab
+    var allBtn=document.querySelector('.subtab-bar .stab');
+    if(allBtn)allBtn.className+=' sta';
+  }
+  renderMachines();
+}
+
 function renderMachines(){
   if(!G)return;
   var slots={gather:[],base:[],stellar:[],dyson:[],void_m:[],sci:[]};
-  for(var i=0;i<MACHINES.length;i++){var m=MACHINES[i];if(slots[m.tab])slots[m.tab].push(buildMachineCard(m));}
+  for(var i=0;i<MACHINES.length;i++){
+    var m=MACHINES[i];
+    if(!slots[m.tab])continue;
+    // Apply sub-tab filter only to gather tab machines
+    if(m.tab==='gather'&&activeResSubtab!=='all'){
+      // Show machine if its resTag matches active subtab, or copper subtab also shows silicon
+      var show=(m.resTag===activeResSubtab);
+      if(activeResSubtab==='copper'&&m.resTag==='copper')show=true;
+      if(!show)continue;
+    }
+    slots[m.tab].push(buildMachineCard(m));
+  }
   var mp=[['gather-machines','gather'],['base-machines','base'],['stellar-machines','stellar'],['dyson-machines','dyson'],['void-machines','void_m'],['sci-machines','sci']];
-  for(var j=0;j<mp.length;j++){var el=document.getElementById(mp[j][0]);if(el)el.innerHTML=slots[mp[j][1]].join('');}
+  for(var j=0;j<mp.length;j++){var el=document.getElementById(mp[j][0]);if(el)el.innerHTML=slots[mp[j][1]].join('')||'<div style="color:#5a5a7a;font-size:10px;padding:8px">No machines in this category.</div>';}
 }
 function renderStorageTab(){
   var el=document.getElementById('storage-upgrades');if(!el)return;var h='';
@@ -1351,7 +1451,7 @@ function renderResGrid(){
     var discovered=G.flags.codexDiscovered[rk]||(val>0);if(!discovered)continue;
     var pct=Math.min(100,(val/cap)*100);var isFull=val>=cap;
     var rpsN=parseFloat(rates[rk]?rates[rk].toString():'0');
-    h+='<div class="res-card on'+(isFull?' capped':'')+'">';
+    h+='<div class="res-card on'+(isFull?' capped':'')+'" data-res="'+rk+'">';
     h+='<div class="rc-top"><div class="rc-name">'+lore.ico+' '+lore.name+'</div></div>';
     h+='<div class="rc-val">'+fmt(G.res[rk])+'</div>';
     if(rpsN!==0)h+='<div class="rc-rps">'+(rpsN>0?'+':'')+fmt(rates[rk])+'/s</div>';
@@ -1440,12 +1540,12 @@ var CHANGELOG=[
   {ver:'v1.0.0',type:'drop',typeLabel:'GAME DROP',date:'2026-03-30',notes:'Full structural refactor. Tiered multi-tab simulation: Production, Adventure, Research, Void Lattice. Science economy. T1-T5 machines. Adventure system with Reboot, Explore, Combat. EMC Lab. 10-tier Power Grid. Sell buttons. Logarithmic doubling storage.'},
   {ver:'v1.0.0',type:'debug',typeLabel:'DEBUG',date:'2026-03-30',notes:'Adventure: Reboot sub-tab with Repair Circuits / Search Beams / Backup Data. Exploration with Rovers, Rockets, Drives, Motherships. Enemy combat with HP/attack logic and zone-based enemy tables.'},
   {ver:'v1.0.0',type:'patch',typeLabel:'PATCH',date:'2026-03-30',notes:'Power Grid: 10 generator tiers from Kinetic Cell (5W) to Dyson Relay (7.5MW). Every machine has powerConsumption. Deficit triggers 50% production slow. All generators have Sell buttons for 50% cost refund.'},
-  {ver:'v1.0.0',type:'patch',typeLabel:'PATCH',date:'2026-03-30',notes:'Storage: Logarithmic doubling. If Photons storage is 500, upgrade costs 500 Photons and yields 1000 capacity. Each level doubles. Cost always equals current cap.'},
-  {ver:'v1.0.0',type:'debug',typeLabel:'DEBUG',date:'2026-03-30',notes:'Old-browser compatibility: all inset:0 replaced with top/right/bottom/left. All overlays use full webkit flex prefix stack. Science bar in header. EMC pool in header. Changelog and versioning system.'}
+  {ver:'v1.0.1',type:'patch',typeLabel:'PATCH',date:'2026-03-31',notes:'Feedback Engine: All Buy/Explore/Research actions now produce specific [ERROR] INSUFFICIENT RESOURCES terminal messages listing every missing resource with have/need amounts. Missing resource storage tanks flash red to direct player attention to bottlenecks.'},
+  {ver:'v1.0.1',type:'drop',typeLabel:'GAME DROP',date:'2026-03-31',notes:'Resource Sub-tab hierarchy in GATHER tab: ALL / PHOTONS / METAL / REGOLITH / COPPER+SI / SCIENCE filter buttons. Kinetic Treadmill removed from Photon sub-tab. Terminal log capped at 50 messages for TV/old browser perf. Void Suite debug commands: [GET 100 ALL MACHINES] and [INJECT ALL RESOURCES].'}
 ];
 function renderSystemUpdates(){
-  var verEl=document.getElementById('sv-ver-display');if(verEl)verEl.textContent='v1.0.0';
-  var buildEl=document.getElementById('sv-build-display');if(buildEl)buildEl.textContent='Engine.0.Debug.0.Drop \u2014 build '+String(CHANGELOG.length).padStart(3,'0');
+  var verEl=document.getElementById('sv-ver-display');if(verEl)verEl.textContent='v1.0.1';
+  var buildEl=document.getElementById('sv-build-display');if(buildEl)buildEl.textContent='Engine.Debug.Drop \u2014 build '+String(CHANGELOG.length).padStart(3,'0');
   var el=document.getElementById('changelog-list');if(!el)return;
   var entries=CHANGELOG.slice().reverse().slice(0,5);var h='';
   for(var i=0;i<entries.length;i++){var e=entries[i];h+='<div class="changelog-entry"><div class="cl-header"><span class="cl-ver">'+e.ver+'</span><span class="cl-type '+e.type+'">'+e.typeLabel+'</span><span class="cl-date">'+e.date+'</span></div><div class="cl-notes">'+e.notes+'</div></div>';}
@@ -1655,6 +1755,39 @@ function debugMaxAll(){if(!isDebugMode())return;var ks=Object.keys(G.res);for(va
 function debugTriggerBMM(){if(!isDebugMode())return;showBMM();}
 function debugUnlockAll(){if(!isDebugMode())return;G.flags.baseUnlocked=true;G.flags.stellarUnlocked=true;G.flags.dysonUnlocked=true;G.flags.voidUnlocked=true;G.flags.ascensionUnlocked=true;G.flags.spaceUnlocked=true;G.flags.universeUnlocked=true;G.flags.multiverseUnlocked=true;unlockTab('production');unlockTab('void');var ab=document.getElementById('tb-ascension');if(ab)ab.style.display='';var zones=['space','universe','multiverse'];for(var i=0;i<zones.length;i++){var btn=document.getElementById('zone-btn-'+zones[i]);if(btn)btn.disabled=false;}G.stats.phase=5;updatePhase();renderAll();notify('[DEBUG] All unlocked.','b');}
 function debugTriggerEvent(){if(!isDebugMode())return;triggerRandomEvent();notify('[DEBUG] Event triggered.','b');}
+function debugGet100AllMachines(){
+  if(!isDebugMode())return;
+  // Set every machine and generator to 100
+  for(var i=0;i<MACHINES.length;i++)G.machines[MACHINES[i].id]=100;
+  for(var j=0;j<GENERATORS.length;j++)G.machines[GENERATORS[j].id]=100;
+  // Also set vessel counts
+  var zones=['planet','space','universe','multiverse'];
+  for(var k=0;k<zones.length;k++)G.machines['vessel_'+zones[k]]=100;
+  G.stats.totalMachines+=100;
+  // Inject enough resources so machines don't drain empty
+  var ks=Object.keys(G.res);for(var ri=0;ri<ks.length;ri++){G.res[ks[ri]]=dc(1e12);discoverResource(ks[ri]);}
+  G.voidChips=dc(G.voidChips).add(dc(500));
+  renderAll();
+  notify('[DEBUG] GET 100 ALL MACHINES \u2014 Fleet deployed.','b');
+  log('[VOID SUITE] All machines set to 100. Resources injected.','tb');
+}
+function debugInjectAllResources(){
+  if(!isDebugMode())return;
+  // Fill every resource to 100% cap
+  var ks=Object.keys(G.res);
+  for(var i=0;i<ks.length;i++){
+    var cap=getStorageCap(ks[i]);
+    G.res[ks[i]]=dc(cap);
+    discoverResource(ks[i]);
+  }
+  // Massive science and power bonus
+  G.res.science=dc(getStorageCap('science'));
+  G.emcPool=1e9;
+  G.voidChips=dc(G.voidChips).add(dc(9999));
+  renderAll();
+  notify('[DEBUG] INJECT ALL RESOURCES \u2014 All tanks at 100%.','b');
+  log('[VOID SUITE] All storage tanks filled to capacity. Void Chips +9999.','tb');
+}
 
 // ============================================================
 // SAVE / LOAD
@@ -1708,7 +1841,7 @@ function importSave(){try{var raw=decodeURIComponent(escape(atob(document.getEle
 // LOG + NOTIFY
 // ============================================================
 function fmtTime(s){s=Math.floor(s);var h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;if(h>0)return h+'h '+m+'m '+sec+'s';if(m>0)return m+'m '+sec+'s';return sec+'s';}
-function log(msg,cls){var now=new Date();var ts=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');var el=document.createElement('div');el.style.cssText='display:flex;padding:3px 0;border-bottom:1px solid #1a1a2e';el.innerHTML='<span style="font-size:8px;color:#3a3a5a;white-space:nowrap;min-width:40px">'+ts+'</span><span style="font-size:10px" class="'+(cls||'')+'">' +msg+'</span>';var s=document.getElementById('slog');if(!s)return;s.insertBefore(el,s.firstChild);while(s.children.length>80)s.removeChild(s.lastChild);}
+function log(msg,cls){var now=new Date();var ts=now.getHours().toString().padStart(2,'0')+':'+now.getMinutes().toString().padStart(2,'0');var el=document.createElement('div');el.style.cssText='display:flex;padding:3px 0;border-bottom:1px solid #1a1a2e';el.innerHTML='<span style="font-size:8px;color:#3a3a5a;white-space:nowrap;min-width:40px">'+ts+'</span><span style="font-size:10px" class="'+(cls||'')+'">' +msg+'</span>';var s=document.getElementById('slog');if(!s)return;s.insertBefore(el,s.firstChild);while(s.children.length>50)s.removeChild(s.lastChild);}
 function notify(msg,type){var el=document.createElement('div');el.className='notif '+(type||'');el.textContent=msg;document.getElementById('notifs').appendChild(el);setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},3200);}
 
 // ============================================================
